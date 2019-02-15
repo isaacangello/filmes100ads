@@ -1,0 +1,30 @@
+.mr-0 > img{
+    width: 100%;
+}
+.mr-1 > img{
+    width: 100%;
+}
+.mr-2 > img{
+    width: 100%;
+}
+.mr-3 > img{
+    width: 100%;
+}
+.mr-4 > img{
+    width: 100%;
+}
+.mr-5 > img{
+    width: 100%;
+}
+/*Fonte do titulo*/
+@import url("https://fonts.googleapis.com/css?family=Crushed");
+.toptitle{
+   text-align: center;
+   font-family: 'Crushed';
+   font-size: 1.5vw;
+   color: #FFF;
+ }
+.toltip > h1{
+font-family: 'Crushed';
+font-size: 20px;
+}
