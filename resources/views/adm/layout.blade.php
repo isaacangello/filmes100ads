@@ -51,7 +51,7 @@
             </div>
         </div>
     </form>
-
+-->
     <!-- Navbar -->
     <ul class="navbar-nav ml-auto ml-md-0 navbar-right">
         <li class="nav-item dropdown no-arrow mx-1">
@@ -101,9 +101,10 @@
             <!-- Breadcrumbs-->
             <ol class="breadcrumb">
                 <li class="breadcrumb-item">
-                    <a href="#">Filmes</a>
+                    <a href="{{ url('adm') }}">Adm</a>
+                    @yield('navegacao')
                 </li>
-                @yield('navegacao')
+
             </ol>
 
             <!-- Icon Cards-->

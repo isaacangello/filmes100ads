@@ -20,6 +20,12 @@ Route::post('/', function () {
 Route::post('/adm', function () {
     return view('adm.adm');
 });
+Route::view('/adm/rendimentos','adm.rendimentos');
+/*
+Route::post('/adm/rendimentos', function () {
+    return view('adm.rendimentos');
+});
+*/
 Route::post('/login', function () {
     return view('auth.login');
 });
@@ -28,5 +34,7 @@ Auth::routes();
 Route::get('/', 'IndexsController@index');
 Route::resource('/','IndexsController');
 Route::resource('/adm','AdmController');
+//Route::resource('/adm/rendimentos','AdmController');
+Route::resource('/adm/rendimentos','RendimentosController');
 
 //Route::get('/', 'HomeController@index')->name('home');
