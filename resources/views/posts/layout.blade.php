@@ -9,7 +9,10 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Filmes sem ADS - Dashboard</title>
+    <title>
+      Filmes sem ADS -
+    @yield('title')
+    </title>
 
     <!-- Bootstrap core CSS-->
     <link href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">

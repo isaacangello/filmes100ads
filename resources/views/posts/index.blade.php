@@ -1,4 +1,15 @@
 @extends('posts.layout')
+
+@section('title')
+    @if ($visualizar != false)
+        Assista&nbsp;{{ $visualizar['name'] }} sem chatisse
+    @else
+        Assista seus filmes sem chatisse
+    @endif
+
+
+@endsection
+
 @section('alerta')
 @if ($message = Session::get('success'))
 <div class='row'>
