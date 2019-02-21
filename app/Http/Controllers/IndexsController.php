@@ -19,7 +19,7 @@ class IndexsController extends Controller
         //
 
         if(!isset($exib_regs)){
-            $exib_regs = 60;
+            $exib_regs = 30;
         }
 
         $total_regs = DB::table('posts')->count();
