@@ -22,36 +22,40 @@
                 </div>
             </div>
             <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="card text-white bg-info o-hidden h-100">
-                    <div class="card-body">
-                        <div class="card-body-icon">
-                            <i class="fas fa-fw fa-save"></i>
+                <a class="text-white clearfix  z-1" href="{{ route('adm', ['viewchar' => 'cad']) }}">
+                        <div class="card text-white bg-info o-hidden h-100">
+                            <div class="card-body">
+                                <div class="card-body-icon">
+                                    <i class="fas fa-fw fa-save"></i>
+                                </div>
+                                <div class="mr-5">Cadastrar Links/Filme(s)</div>
+                            </div>
+                            <span class="card-footer text-white clearfix small z-1">
+                                <span class="float-left">Ver Detalhes</span>
+                                <span class="float-right">
+                                <i class="fas fa-angle-right"></i>
+                              </span>
+                            </span>
                         </div>
-                        <div class="mr-5">Cadastrar Filme(s)</div>
-                    </div>
-                    <a class="card-footer text-white clearfix small z-1" href="#">
-                        <span class="float-left">Ver Detalhes</span>
-                        <span class="float-right">
-                        <i class="fas fa-angle-right"></i>
-                      </span>
-                    </a>
-                </div>
+                </a>
             </div>
             <div class="col-xl-3 col-sm-6 mb-3">
-                <div class="card text-white bg-info o-hidden h-100">
-                    <div class="card-body">
-                        <div class="card-body-icon">
-                            <i class="fas fa-fw fa-list-alt"></i>
+                <a class="text-white clearfix  z-1" href="">
+                    <div class="card text-white bg-info o-hidden h-100">
+                        <div class="card-body">
+                            <div class="card-body-icon">
+                                <i class="fas fa-fw fa-list-alt"></i>
+                            </div>
+                            <div class="mr-5">Meus Filmes Cadastrados</div>
                         </div>
-                        <div class="mr-5">Meus Filmes Cadastrados</div>
+                        <span class="card-footer text-white clearfix small z-1" >
+                            <span class="float-left">Ver Detalhes</span>
+                            <span class="float-right">
+                            <i class="fas fa-angle-right"></i>
+                          </span>
+                        </span>
                     </div>
-                    <a class="card-footer text-white clearfix small z-1" href="#">
-                        <span class="float-left">Ver Detalhes</span>
-                        <span class="float-right">
-                        <i class="fas fa-angle-right"></i>
-                      </span>
-                    </a>
-                </div>
+                </a>
             </div>
 
             <div class="col-xl-3 col-sm-6 mb-3">
