@@ -22,7 +22,7 @@
                 </div>
             </div>
             <div class="col-xl-3 col-sm-6 mb-3">
-                <a class="text-white clearfix  z-1" href="{{ route('adm', ['viewchar' => 'cad']) }}">
+                <a class="text-white clearfix  z-1" href="{{ url('adm/cadastro') }}">
                         <div class="card text-white bg-info o-hidden h-100">
                             <div class="card-body">
                                 <div class="card-body-icon">

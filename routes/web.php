@@ -14,21 +14,32 @@
 Route::get('/', function () {
     return view('posts.index');
 });
-Route::get('/adm', function () {
-    return view('adm.adm');
-});
 
 // toras posts
 Route::post('/', function () {
     return view('posts.index');
 });
-Route::any('adm/viewchar/{viewchar?}', function ($viewchar = 'adm') {
-    return view('adm.adm');
+/*Route::any('adm/viewchar/{viewchar?}', function ($viewchar = 'adm') {
+    return view('adm.adm', ['viewchar' => $viewchar]);
 })->name('adm');
+*/
+
+//Route::view('adm/rendimentos','adm.rendimentos');
+Route::prefix('adm')->group(function () {
+    Route::any('/', function (){return view('adm.adm');});
+    Route::any('/cadastro', function (){return view('adm.cadastro');});
+    Route::any('/redimentos', function (){return view('adm.Rendimentos');});
+    Route::resource('/','AdmController');
+    Route::resource('/rendimentos','RendimentosController');
+    Route::resource('/cadastro','CadController');
 
 
-Route::view('adm/rendimentos','adm.rendimentos');
-Route::view('adm/cadastro','adm.cad');
+});
+    
+
+//Route::any('/adm', function (){return view('adm.adm');})->name('adm');
+
+
 
 Route::post('/login', function () {
     return view('auth.login');
@@ -38,8 +49,4 @@ Auth::routes();
 Route::get('/', 'IndexsController@index');
 Route::resource('/','IndexsController');
 
-Route::resource('/adm','AdmController');
-
-Route::resource('adm/rendimentos','RendimentosController');
-Route::resource('adm/cadastro','CadController');
 //Route::get('/', 'HomeController@index')->name('home');

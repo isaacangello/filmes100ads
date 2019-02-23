@@ -3,9 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Input;
-
-//use Symfony\Component\Routing\Route;
 
 class AdmController extends Controller
 {
@@ -16,16 +13,13 @@ class AdmController extends Controller
 
     public function index(Request $request)
     {
-        return view('adm.adm');
-    }
-
-    public function show(){
-        if (Input::get('viewchar'))
-        {
-            $viewchar = Input::get('viewchar');
+        $viewchar = $request->viewchar;
+        echo $request->viewchar;
+        if ($viewchar) {
             switch ($viewchar) {
                 case 'cad':
-                    return redirect('adm/cad');
+                    echo 'aqui';
+                    return view('adm.cadastro');
                     break;
                 case 1:
                     echo "i equals 1";
@@ -34,13 +28,39 @@ class AdmController extends Controller
                     echo "i equals 2";
                     break;
                 default:
-                    return redirect('adm');
+                    ;
             }
+        }else
 
-
+            return view('adm.adm');
         }
+
+
+
+    public function show(Request $request){
+        $viewchar = $request->viewchar;
+        echo $request->viewchar;
+        if ($viewchar) {
+            switch ($viewchar) {
+                case 'cad':
+                    return view('adm.cadastro');
+                    break;
+                case 1:
+                    echo "i equals 1";
+                    break;
+                case 2:
+                    echo "i equals 2";
+                    break;
+                default:
+                    ;
+            }
+                return view('adm.rendimentos');
+        }
+
+
+
 
     }
 
-
 }
+

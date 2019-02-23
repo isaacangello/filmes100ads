@@ -12,8 +12,13 @@ class CadController extends Controller
         $this->middleware('guest');
     }
 
-    public function index (Request $request){
+    public function index (){
+        echo 'aqui';
         return view('adm.cad');
+    }
+    public function show (Request $request){
+        echo 'aqui';
+        redirect('cadastro.index');
     }
 
 
