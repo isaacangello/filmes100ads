@@ -38,3 +38,28 @@ font-size: 20px;
     border: 1px solid #818182;
     border-radius: 4px;
 }
+
+.panel{
+    border-radius: 4px;
+    border: 1px solid #c8cbcf;
+}
+
+.panel-default{
+    /*border: 1px solid #818182;*/
+    background-color: #b1b7ba;
+
+}
+.panel-heading{
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    padding: 10px 3px 10px 10px;
+}
+.panel-info{
+    /*border: 1px solid #818182;*/
+    background-color: #17a2b8;
+    color: white;
+}
+.panel-body{
+    padding: 20px 20px 20px 20px;
+
+}

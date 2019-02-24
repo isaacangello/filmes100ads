@@ -10,12 +10,11 @@
         <div class="row">
             <div class="col-2"></div>
             <div class="col-xl-8 col-sm-6">
-                <div class="card card-register mx-auto mt-5" style="width: 100%; min-width: 800px;">
-                    <div class="card-header " style="width: 100%;margin: 0px;">Cadastrar de Link/Filmes</div>
-                    <div class="card-body " style="width: 100%;">
+                <div class="panel ">
+                    <div class="panel-heading panel-info">Cadastrar de Link/Filmes</div>
+                    <div class="panel-body ">
 
 
-                </div>
 
                 <div class="row">
 
@@ -47,9 +46,9 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="row">
+
+
 
                     <div class="col-xl-12 col-md-12 ">
                         <div c]ass="form-group">
@@ -63,15 +62,18 @@
                             </div>
                         </div>
                     </div>
-
+                    <div class="col-auto"></div>
                 </div>
 
 
             </div>
-            <div class="col-auto"></div>
-        </div>
+
             </div>
-            </div>
+        </div><!--col-->
+
+            </div> <!--row-->
+            </div><!--container-fuid-->
+
 
 
 

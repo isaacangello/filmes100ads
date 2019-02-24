@@ -11,6 +11,8 @@
 
     <title>Filmes sem ADS - ADM</title>
 
+    <link href="{{ asset('css/app.css') }}">
+
     <!-- Bootstrap core CSS-->
     <link href="{{ asset('vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
 
