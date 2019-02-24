@@ -31,3 +31,10 @@ font-size: 20px;
 .esp3 {
     margin-right: 3px;
 }
+
+.select-append{
+    width: 100%;
+    padding: 14px 5px 14px 5px;
+    border: 1px solid #818182;
+    border-radius: 4px;
+}

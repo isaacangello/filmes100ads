@@ -22,7 +22,7 @@
                 </div>
             </div>
             <div class="col-xl-3 col-sm-6 mb-3">
-                <a class="text-white clearfix  z-1" href="{{ url('adm/cadastro') }}">
+                <a class="text-white clearfix  z-1" href="{{ route('param',['view' => 'cadastro'] ) }}">
                         <div class="card text-white bg-info o-hidden h-100">
                             <div class="card-body">
                                 <div class="card-body-icon">
@@ -59,7 +59,7 @@
             </div>
 
             <div class="col-xl-3 col-sm-6 mb-3">
-                <a class="text-white clearfix  z-1" href="{{ url('adm/rendimentos') }}">
+                <a class="text-white clearfix  z-1" href="{{ route('param',[ 'view' => 'rendimentos'] ) }}">
                     <div class="card text-white bg-success o-hidden h-100">
                         <div class="card-body">
                             <div class="card-body-icon">
