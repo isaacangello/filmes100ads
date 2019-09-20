@@ -23,8 +23,8 @@ Route::prefix('/adm')->group(function () {
     Route::match(['GET', 'POST'], '/', "AdmController@index")->name('adm');
 
     Route::resource('cadastro','CadController');
-    Route::get('meuscadastros/pag/{pag?}', "ListcadsController@index")->name('meuscadastros.index');
-    Route::resource('meuscadastros','ListcadsController');
+    Route::match(['GET', 'POST'],'meuscadastros/pag/{pag?}', "ListcadsController@index")->name('meuscadastros.index');
+    //Route::resource('meuscadastros','ListcadsController');
     Route::match(['GET', 'POST'], '/salvando', "CadController@postinsert")->name('cadastro.salvando');
 });
 
@@ -33,7 +33,9 @@ Route::prefix('/adm')->group(function () {
 Route::post('/login', function () {
     return view('auth.login');
 });
-
+Route::match(['GET','POST'],'/home',function(){
+    return redirect()->route('adm');
+});
 Auth::routes();
 
 

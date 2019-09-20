@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 class listcadsController extends Controller
 {
     //
-    public function index(Request $request){
+    public function index(Request $request,$pag = 1){
         /*-------------------------------------------------------------------------------------------------*/
         /*Tratando quantidade de registros por página.
         /*-------------------------------------------------------------------------------------------------*/
@@ -44,7 +44,7 @@ class listcadsController extends Controller
         $posts_user = DB::table('categorias_posts')
             ->join('posts','categorias_posts.post_id','=','posts.id')
             ->join('categorias','categorias_posts.categoria_id','=','categorias.id')
-            ->select('posts.id','posts.name','posts.realname','categorias.name as categorias')
+            ->select('posts.id','posts.name','posts.status1 as status','posts.realname','categorias.name as categorias')
             ->where('user_id',Auth::user()->id)
             ->skip($skip_point)
             ->take($exib_regs)

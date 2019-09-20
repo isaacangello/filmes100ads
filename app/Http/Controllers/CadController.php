@@ -1,13 +1,14 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Categoria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Input;
+//use Illuminate\Support\Facades\Input;
 use Intervention\Image\Facades\Image;
-use Validator;
+//use Validator;
 
 class CadController extends Controller
 {
@@ -18,19 +19,25 @@ class CadController extends Controller
 
     public function index(Request $request)
     {
-        $var = Input::all();
+        $req_array = $request->all();
+        foreach ($req_array as $key =>  $reg ){
+            $request->session()->put($key,$reg);
+        }
+        $request->session()->put('categorias', Categoria::all());
+
+        $request->session()->put('var','teste');
 
         $paises = Collection::make( json_decode(file_get_contents('./storage/paises-array.json')));
-
-        return view('adm.cadastro', ['paises' => $paises]);
+        return view('adm.cadastro',
+            [
+                'paises' => $paises,
+            ]
+        );
         //$callback = $request->name;
     }
 
-
-    public function store(Request $request){
-
-
-        //dd($request->capa->getMimeType());
+    public function withValidator($validator)
+    {
         $regras =[
             'name' => 'required',
             'realname' => 'required',
@@ -48,9 +55,22 @@ class CadController extends Controller
             'image' => 'Houve algum problema com a imagem',
             'max' => 'a :attribute deve ter um tamanho máximo de 5mb ',
         ];
+        $validator->after(function ($validator) {
+            if ($this->somethingElseIsInvalid()) {
+                $validator->errors()->add('field', 'Something is wrong with this field!');
+            }
+        });
+    }
+    public function store(Request $request){
+
+
+        //dd($request->capa->getMimeType());
+
 
         $paises = Collection::make( json_decode(file_get_contents('./storage/paises-array.json')));
-        $validator = Validator::make($request->all(), $regras, $messages)->validate();
+        //$validator = Validator::make($request->all(), $regras, $messages)->validate();
+        $saida = $request->all()->validate();
+
         if($request->tocrop == 1 ){
             $request->session()->put('postdatasave',$request->except('capa') );
             //dd($request->session()->all());

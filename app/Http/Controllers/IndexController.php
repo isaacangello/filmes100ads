@@ -8,7 +8,7 @@ use App\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Input;
+//use Illuminate\Support\Facades\Input;
 
 class IndexController extends Controller
 {
@@ -28,15 +28,15 @@ class IndexController extends Controller
 
         $total_regs = DB::table('posts')->count();
         //echo 'total de registros-> '.$total_regs;
-        $pag = Input::get('pag');
-        if( isset($pag) ){$pag = Input::get('pag');}else{$pag = 1;}
+        $pag = $request->pag;
+        if( isset($pag) ){$pag = $request->pag;}else{$pag = 1;}
         /*______________________________________________________*/
         /*Verificando a existência da identificação de uma categoria
         *
         */
-        if(Input::get('categorias'))
+        if($request->categorias)
         {
-            $cate_var =Input::get('categorias');
+            $cate_var =$request->categorias;
             $total_regs = DB::table('categorias_posts')
                 ->select('post_id','id')
                 ->where('categoria_id',"$cate_var")
@@ -77,10 +77,10 @@ class IndexController extends Controller
 
 
             //$posts = Collection::make($posts);
-            if (Input::get('pag'))
+            if ($request->pag)
             {
                 /*______________________________________________________*/
-                $pag = Input::get('pag');
+                $pag = $request->pag;
                 $skip_point = ($pag * $exib_regs) - $exib_regs;
                 $posts = DB::table('posts')->select('id','name','sinopse')
                     ->skip($skip_point)
@@ -94,7 +94,7 @@ class IndexController extends Controller
         }
         $total_pages = ceil($total_regs / $exib_regs);
 
-        $cate_var =Input::get('categorias');
+        $cate_var = $request->categorias;
         if(!isset($categoria_nome)){$categoria_nome =false;}
 
         $categorias = Categoria::all();

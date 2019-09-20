@@ -124,13 +124,13 @@ class DatabaseSeeder extends Seeder
 
         for ($i=1;$i <=5000;$i++) {
             $seed_post_id = DB::table('posts')->insertGetId([
-                'name' => str_random(15),
-                'realname' => str_random(10),
+                'name' => Str::random(15),
+                'realname' => Str::random(10),
                 'sinopse' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in ',
                 'status1' => 'ativado',
                 'status2' => 'aprovado',
                 'user_id' => rand(1, 3),
-                'diretor' => str_random(10),
+                'diretor' => Str::random(10),
                 'duracao' => rand(100, 180),
                 'ano' => '20' . rand(10, 19),
                 'pais' => 'Estrangeiro',

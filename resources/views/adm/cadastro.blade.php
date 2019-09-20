@@ -22,7 +22,6 @@
                     </div>
                 @endif
 
-
         <div class="moldura">
             <div class="moldura_header text-white"> <h5>Cadastro de Links / Filmes</h5></div>
             <div class="moldura_body">
@@ -68,9 +67,11 @@
                                     <div class="form-label-group">
                                         <select name="categoria" class="browser-default text-md-right custom-select custom-select-lg mb-3" style="font-size: 1rem;">
                                             <option selected>Categorias</option>
-                                            @foreach($categorias as $categoria)
+                                        @if(Session::get('categorias'))
+                                            @foreach(Session::get('categorias') as $categoria)
                                             <option value="{{ $categoria->id }}">{{ $categoria->name }}</option>
                                             @endforeach
+                                        @endif
                                         </select>
                                         @if ($errors->has('categoria'))
                                             <span class="help-block">

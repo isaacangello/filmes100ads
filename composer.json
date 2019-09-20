@@ -12,6 +12,7 @@
         "doctrine/dbal": "^2.9",
         "fideloper/proxy": "^4.0",
         "illuminate/support": "^6.0",
+        "intervention/image": "2.5.0",
         "laravel/framework": "^6.0",
         "laravel/tinker": "^1.0",
         "laravel/ui": "1.x-dev"

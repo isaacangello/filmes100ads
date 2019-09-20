@@ -3,27 +3,39 @@
 @section('content')
 <div class="container container-fluid">
     <div class="row">
-        <div class="col-1"></div>
-        <div class="col-10">
+
+        <div class="col-12">
             <div class="table-responsive">
             <table class="table table-bordered table-hover table-striped">
                 <thead>
                 <tr>
-                    <th class="bg-info text-white" scope="col">#</th>
+                    <th class="bg-info text-white" scope="col" style="text-align: center">#</th>
                     <th class="bg-info text-white" scope="col">Nome do Filme</th>
                     <th class="bg-info text-white" scope="col">Categoria</th>
-                    <th class="bg-info text-white" scope="col">Ações</th>
+                    <th class="bg-info text-white" scope="col">Status</th>
+                    <th class="bg-info text-white" scope="col" style="text-align: center">Ações</th>
                 </tr>
                 </thead>
                 <tbody>
                     @foreach($posts_user as $post)
                     <tr>
-                        <th scope="row" class="esp4em">{{ $post->id }}</th>
+                        <td scope="row" class="esp4em">{{ $post->id }}</td>
                         <td class="esp4em">{{ $post->name }}</td>
                         <td class="esp4em">{{ $post->categorias }}</td>
-                        <td style="width: 15%;text-align: center">
-                            <button type="button" class="btn btn-sm btn-outline-info">Editar</button>
-                            <button type="button" class="btn btn-sm btn-outline-danger">Excluir</button>
+                        <td class="esp4em">{{ $post->status }}</td>
+                        <td>
+                            <form method="POST" action="{{ route('cadastro.store') }}" enctype="multipart/form-data">
+                                <input type="hidden" name="_method" value="POST">
+                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="editar" value="{{ $post->id }}">
+                                <button type="submit" class="btn btn-sm btn-outline-info float-left display-2" style="margin-right: 2px;">Editar</button>
+                            </form>
+                            <form method="POST" action="{{ route('cadastro.store') }}" enctype="multipart/form-data">
+                                <input type="hidden" name="_method" value="POST">
+                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="excluir" value="{{ $post->id }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger float-left display-2">Excluir</button>
+                            </form>
                         </td>
                     </tr>
                     @endforeach
@@ -31,7 +43,7 @@
             </table>
             </div>
         </div>
-        <div class="col-1"></div>
+
 
     </div>
     <div class="row">
