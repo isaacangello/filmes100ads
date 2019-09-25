@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 use App\Categoria;
+//use App\Http\Requests\StorePost;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 //use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
+//use Illuminate\Validation\Validator;
 use Intervention\Image\Facades\Image;
-//use Validator;
 
 class CadController extends Controller
 {
@@ -31,36 +34,12 @@ class CadController extends Controller
         return view('adm.cadastro',
             [
                 'paises' => $paises,
+                'categorias' => Categoria::all(),
             ]
         );
         //$callback = $request->name;
     }
 
-    public function withValidator($validator)
-    {
-        $regras =[
-            'name' => 'required',
-            'realname' => 'required',
-            'categoria' => 'required',
-            'diretor' => 'required',
-            'duracao' => 'required',
-            'pais' => 'required',
-            'ano' => 'required',
-            'sinopse' => 'required',
-            'capa' => 'required|image',
-            'url1' => 'required',
-        ];
-        $messages =[
-            'required' => 'O campo :attribute deve ser preenchido',
-            'image' => 'Houve algum problema com a imagem',
-            'max' => 'a :attribute deve ter um tamanho máximo de 5mb ',
-        ];
-        $validator->after(function ($validator) {
-            if ($this->somethingElseIsInvalid()) {
-                $validator->errors()->add('field', 'Something is wrong with this field!');
-            }
-        });
-    }
     public function store(Request $request){
 
 
@@ -69,8 +48,38 @@ class CadController extends Controller
 
         $paises = Collection::make( json_decode(file_get_contents('./storage/paises-array.json')));
         //$validator = Validator::make($request->all(), $regras, $messages)->validate();
-        $saida = $request->all()->validate();
+/**
+ * Personalizando mensagens
+ */
+    $messeges=          [
+                            'required' => 'O campo :attribute deve ser preenchido',
+                            'image' => 'Houve algum problema com a imagem',
+                            'max' => 'a :attribute deve ter um tamanho máximo de 5mb ',
+                        ];
+        /**
+         * Tratando erros
+         */
+    $regras=             [
+                            'name' => 'require',
+                            'realname' => 'require',
+                            'sinopse' => 'require',
+                            'diretor' => 'require',
+                            'duracao' => 'require',
+                            'ano' => 'require',
+                            'pais' => 'require',
+                            'sinopse' => 'require',
+                            'capa' => 'require|image',
+                            'label1' => 'require',
+                            'url1' => 'require',
+                        ];
+        $saida = Validator::make($request->all(),$regras,$messeges);
 
+  /*      if ($saida->fails()) {
+            return redirect('adm/cadastro')
+                ->withErrors($saida)
+                ->withInput();
+        }
+*/
         if($request->tocrop == 1 ){
             $request->session()->put('postdatasave',$request->except('capa') );
             //dd($request->session()->all());
@@ -160,8 +169,11 @@ class CadController extends Controller
         $paises = Collection::make( json_decode(file_get_contents('./storage/paises-array.json')));
         return view(
             'adm.cadastro',
-            [ 'sucess' => "Cadastro Efetuado con sucesso."],
-            ['paises' => $paises]
+            [
+            'sucess' => "Cadastro Efetuado con sucesso.",
+            'paises' => $paises,
+            'categorias' => Categoria::all(),
+            ]
         );
     }
 

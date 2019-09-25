@@ -67,8 +67,8 @@
                                     <div class="form-label-group">
                                         <select name="categoria" class="browser-default text-md-right custom-select custom-select-lg mb-3" style="font-size: 1rem;">
                                             <option selected>Categorias</option>
-                                        @if(Session::get('categorias'))
-                                            @foreach(Session::get('categorias') as $categoria)
+                                        @if($categorias)
+                                            @foreach($categorias as $categoria)
                                             <option value="{{ $categoria->id }}">{{ $categoria->name }}</option>
                                             @endforeach
                                         @endif

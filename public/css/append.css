@@ -34,8 +34,11 @@ font-size: 20px;
 div.red{
     float: left;
     color: #ea1000;
-    width:20%;
+    width:30%;
 }
 .esp4em{
     padding-top: 0.98em!important;
+}
+.table-expand{
+    width: 90%!important;
 }

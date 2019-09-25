@@ -2,11 +2,21 @@
 
 @section('content')
 <div class="container container-fluid">
+    @if(isset($sucesso) && $sucesso != " ")
+    <div class="row">
+
+        <div class="col-12">
+            <div class="container container-fluid bg-success text-center text-dark">
+               {{ $sucesso ?? ' ' }}
+            </div>
+        </div>
+    </div>
+    @endif
     <div class="row">
 
         <div class="col-12">
             <div class="table-responsive">
-            <table class="table table-bordered table-hover table-striped">
+            <table class="table table-bordered table-hover table-striped table-responsive-sm">
                 <thead>
                 <tr>
                     <th class="bg-info text-white" scope="col" style="text-align: center">#</th>
@@ -24,16 +34,22 @@
                         <td class="esp4em">{{ $post->categorias }}</td>
                         <td class="esp4em">{{ $post->status }}</td>
                         <td>
-                            <form method="POST" action="{{ route('cadastro.store') }}" enctype="multipart/form-data">
+                            <form method="POST" action="#" enctype="multipart/form-data">
                                 <input type="hidden" name="_method" value="POST">
                                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                 <input type="hidden" name="editar" value="{{ $post->id }}">
+                                <input type="hidden" name="pag" value="{{ $pag }}">
+                                <input type="hidden" name="total_regs" value="{{ $total_regs }}">
+                                <input type="hidden" name="exib_regs" value="{{ $exib_regs }}">
                                 <button type="submit" class="btn btn-sm btn-outline-info float-left display-2" style="margin-right: 2px;">Editar</button>
                             </form>
-                            <form method="POST" action="{{ route('cadastro.store') }}" enctype="multipart/form-data">
+                            <form method="POST" action="{{ route('meuscadastros.modstatus') }}" enctype="multipart/form-data">
                                 <input type="hidden" name="_method" value="POST">
                                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                 <input type="hidden" name="excluir" value="{{ $post->id }}">
+                                <input type="hidden" name="pag" value="{{ $pag }}">
+                                <input type="hidden" name="total_regs" value="{{ $total_regs }}">
+                                <input type="hidden" name="exib_regs" value="{{ $exib_regs }}">
                                 <button type="submit" class="btn btn-sm btn-outline-danger float-left display-2">Excluir</button>
                             </form>
                         </td>

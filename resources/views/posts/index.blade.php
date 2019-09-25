@@ -42,9 +42,9 @@
        $dados = Session::get('visualizar');
      @endphp
         <div class="row container-fluid">
-         <div class="col-xl-2 col-sm-2 mb-2">&nbsp;</div>
-         <div class="col-xl-8 col-sm-8 mb-8 border-primary">
-             <table class="table table-responsive-xl">
+         <div class="col-2">&nbsp;</div>
+         <div class="col-10   border-primary">
+             <table class="table table-responsive container-fluid" style="width: 100%;">
                  <tbody>
                  <tr>
                      <td style="width: 30%;margin-right: 10px;padding-right: 0px;">
@@ -55,18 +55,18 @@
                          @endif
 
                      </td>
-                     <td>
+                     <td style="width: 60%!important;">
                          <table class="table table-sm table-responsive-sm">
                              <tbody>
 
                                 <tr>
-                                    <td class="bg-danger" style="color: #FFFFFF;">Filme:&nbsp;{{ $visualizar['name'] }}</td>
+                                    <td class="bg-danger text-white">Filme:</td><td class="bg-danger text-white">{{ $visualizar['name'] }}</td>
                                 </tr>
-                                <tr><td><div class="red" >Título original :</div>&nbsp;&nbsp;{{ $visualizar['realname'] }}&nbsp;</td></tr>
-                                <tr><td><div class="red" >Categoria:</div>&nbsp;&nbsp;{{ $visualizar['categoria'] }}</td></tr>
-                                <tr><td><div class="red" >Diretor:</div>&nbsp;&nbsp;{{ $visualizar['diretor'] }}</td></tr>
-                                <tr><td><div class="red" >Duraç&atilde;o:</div>&nbsp;&nbsp;{{ $visualizar['duracao'].' min.' }}</td></tr>
-                                <tr><td><div class="red" >Ano:</div>&nbsp;&nbsp;{{ $visualizar['ano'] }}</td></tr>
+                                <tr><td class="text-danger">Título original :   </td><td>&nbsp; {{ $visualizar['realname'] }}&nbsp;</td></tr>
+                                <tr><td class="text-danger">Categoria:          </td><td>&nbsp;&nbsp;{{ $visualizar['categoria'] }}</td></tr>
+                                <tr><td class="text-danger">Diretor:            </td><td>&nbsp;&nbsp;{{ $visualizar['diretor'] }}</td></tr>
+                                <tr><td class="text-danger">Duraç&atilde;o:            </td><td>&nbsp;&nbsp;{{ $visualizar['duracao'].' min.' }}</td></tr>
+                                <tr><td class="text-danger">Ano:                </td><td>&nbsp;{{ $visualizar['ano'] }}</td></tr>
 
                              </tbody>
                          </table>
@@ -82,7 +82,6 @@
                  </tbody>
              </table>
          </div>
-         <div class="col-xl-2 col-sm-2 mb-2">&nbsp;</div>
         </div>
         <div class="row container-fluid">
             <div class="col col-xl-12 col-sm-12 mb-2">
@@ -199,7 +198,7 @@
                     </li>
 
                 @endif
-                @for($i=10;$i>=1;$i--)
+                @for($i=6;$i>=1;$i--)
                     @if (($pag-$i) >= 1 )
                         <li class="page-item"><a class="page-link" href="{{ route('index', ['pag' => ($pag - $i), 'categorias' => $cate_var ]) }}">{{ ($pag - $i) }}</a></li>
                     @endif
@@ -207,7 +206,7 @@
                 <li class="page-item active">
                     <a class="page-link" href="#">{{ $pag }} <span class="sr-only">(atual)</span></a>
                 </li>
-                @for($i=1;$i<=10;$i++)
+                @for($i=1;$i<=5;$i++)
                     @if (($pag+$i) <= (ceil($total_regs/$exib_regs)) )
                         <li class="page-item"><a class="page-link" href="{{ route('index', ['pag' => ($pag + $i), 'categorias' => $cate_var ]) }}">{{ ($pag + $i) }}</a></li>
                     @endif
@@ -236,7 +235,7 @@
                     </li>
 
                 @endif
-            @for($i=10;$i>=1;$i--)
+            @for($i=8;$i>=1;$i--)
                 @if (($pag-$i) >= 1 )
                     <li class="page-item"><a class="page-link" href="{{ route('index', ['pag' => ($pag - $i)]) }}">{{ ($pag - $i) }}</a></li>
                 @endif
@@ -244,7 +243,7 @@
                 <li class="page-item active">
                     <a class="page-link" href="#">{{ $pag }} <span class="sr-only">(atual)</span></a>
                 </li>
-                @for($i=1;$i<=10;$i++)
+                @for($i=1;$i<=8;$i++)
                     @if (($pag+$i) <= (ceil($total_regs/$exib_regs)) )
                         <li class="page-item"><a class="page-link" href="{{ route('index', ['pag' => ($pag + $i)]) }}">{{ ($pag + $i) }}</a></li>
                     @endif

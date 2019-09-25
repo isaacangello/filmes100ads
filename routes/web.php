@@ -24,8 +24,9 @@ Route::prefix('/adm')->group(function () {
 
     Route::resource('cadastro','CadController');
     Route::match(['GET', 'POST'],'meuscadastros/pag/{pag?}', "ListcadsController@index")->name('meuscadastros.index');
-    //Route::resource('meuscadastros','ListcadsController');
-    Route::match(['GET', 'POST'], '/salvando', "CadController@postinsert")->name('cadastro.salvando');
+    Route::match(['PUT', 'POST','PATCH'],'meuscadastros/pag/{pag?}', "ListcadsController@modstatus")->name('meuscadastros.modstatus');
+    Route::resource('rendimentos','RendimentosController');
+    Route::any('/salvando', "CadController@postinsert")->name('cadastro.salvando');
 });
 
 
