@@ -2,7 +2,7 @@
 
 Projeto de portifólio funcional escrito em PHP utilizando Framework Laravel 5.8. 
 
-Esses site contem um sistema de gerenciamento de usuários, com cadastro de dados em banco de dados relaional(mysql),  
+Esses site contem um sistema de gerenciamento de usuários, com cadastro de dados em banco de dados relaional(mysql).  
 
 ### Telas do Projeto
 
