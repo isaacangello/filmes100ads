@@ -3,21 +3,21 @@
 namespace App\Http\Controllers;
 
 
-use App\Categoria;
-use App\Post;
+use App\Models\Categoria;
+use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Input;
+
 
 class IndexController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Foundation\Application|\Illuminate\View\View
      */
-    public function index(Request $request, $pag = 1)
+    public function index(Request $request)
     {
         $array_result = array();
         //
@@ -28,15 +28,15 @@ class IndexController extends Controller
 
         $total_regs = DB::table('posts')->count();
         //echo 'total de registros-> '.$total_regs;
-        $pag = Input::get('pag');
-        if( isset($pag) ){$pag = Input::get('pag');}else{$pag = 1;}
+        $pag = $request->pag;
+        if( $request->has('pag') and $request->pag >0  ){$pag = $request->pag;}else{$pag = 1;}
         /*______________________________________________________*/
         /*Verificando a existência da identificação de uma categoria
         *
         */
-        if(Input::get('categorias'))
+        if($request->has('categorias'))
         {
-            $cate_var =Input::get('categorias');
+            $cate_var =$request->categorias;
             $total_regs = DB::table('categorias_posts')
                 ->select('post_id','id')
                 ->where('categoria_id',"$cate_var")
@@ -59,45 +59,67 @@ class IndexController extends Controller
             {
 
                 $query_temp = DB::table('posts')
-                    ->select('id','name','sinopse','user_id')
+                    ->select('id','name','sinopse','user_id','ano','duracao')
                     ->where('id', $pst_temp->post_id)->first();
-                $array_result[$i]["id"] = $query_temp->id;
-                $array_result[$i]["user_id"] = $query_temp->user_id;
-                $array_result[$i]["name"] = $query_temp->name;
-                $array_result[$i]["sinopse"] = $query_temp->sinopse;
+                $array_result[$i] = (object) [
+                    "id" => $query_temp->id,
+                    "user_id" => $query_temp->user_id,
+                    "name" => $query_temp->name,
+                    "sinopse" => $query_temp->sinopse,
+                    "ano" => $query_temp->ano,
+                    "duracao" => $query_temp->duracao,
+                ];
 
                 $i++;
 
             }
-            $array_result = json_encode($array_result);
 
 
-            $posts = Collection::make(json_decode($array_result));
+
+            $posts = Collection::make($array_result);
         }else{
 
 
             //$posts = Collection::make($posts);
-            if (Input::get('pag'))
+            if ($request->has('pag'))
             {
                 /*______________________________________________________*/
-                $pag = Input::get('pag');
+                $pag = $request->pag;
                 $skip_point = ($pag * $exib_regs) - $exib_regs;
-                $posts = DB::table('posts')->select('id','name','sinopse')
+                $posts = DB::table('posts')->select('id','name','sinopse','ano','duracao')
                     ->skip($skip_point)
                     ->take($exib_regs)
                     ->get();
             }
             else
             {
-                $posts = Post::all()->take($exib_regs);
+                $posts = DB::table('posts')->select('id','name','sinopse','ano','duracao')
+                    ->take($exib_regs)
+                    ->get();
             }
         }
         $total_pages = ceil($total_regs / $exib_regs);
 
-        $cate_var =Input::get('categorias');
+        $cate_var =$request->categorias;
         if(!isset($categoria_nome)){$categoria_nome =false;}
 
         $categorias = Categoria::all();
+
+        /* Categorias dos filmes exibidos (para os chips do card) */
+        $categoriaPorPost = [];
+        if ($posts && count($posts)) {
+            $ids = collect($posts)->pluck('id')->all();
+            $categoriaPorPost = DB::table('categorias_posts')
+                ->join('categorias', 'categorias_posts.categoria_id', '=', 'categorias.id')
+                ->whereIn('categorias_posts.post_id', $ids)
+                ->get(['categorias_posts.post_id', 'categorias.name'])
+                ->groupBy('post_id')
+                ->map(function ($grupo) {
+                    return $grupo->first()->name;
+                })
+                ->toArray();
+        }
+
         /* tratando visualização*/
         //dd($request->filmeid);
             if ($request->filmeid)
@@ -138,24 +160,23 @@ class IndexController extends Controller
                 $visualizar = false;
                 $urls_visualizar = false;
             }
-        return view
-        (
-            'posts.index',
-            [
-                'posts' => $posts,
-                'categorias' => $categorias,
-                'total_pages' => $total_pages,
-                'total_regs' => $total_regs,
-                'exib_regs' => $exib_regs,
-                'pagina_atual' => $pag,
-                'pag' => $pag,
-                'cate_var' => $cate_var,
-                'categoria_nome' => $categoria_nome,
-                'visualizar' => $visualizar,
-                'urls_visualizar' => $urls_visualizar
+        $dados = [
+            'posts' => $posts,
+            'categorias' => $categorias,
+            'total_pages' => $total_pages,
+            'total_regs' => $total_regs,
+            'exib_regs' => $exib_regs,
+            'pagina_atual' => $pag,
+            'pag' => $pag,
+            'cate_var' => $cate_var,
+            'categoria_nome' => $categoria_nome,
+            'visualizar' => $visualizar,
+            'urls_visualizar' => $urls_visualizar,
+            'categoriaPorPost' => $categoriaPorPost,
+        ];
 
-            ]
-        );
+        // Detalhe do filme ou listagem do catálogo.
+        return view($visualizar ? 'catalog.show' : 'catalog.index', $dados);
 
     }
 

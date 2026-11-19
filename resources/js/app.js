@@ -1,32 +1,28 @@
-/**
- * First we will load all of this project's JavaScript dependencies which
- * includes Vue and other libraries. It is a great starting point when
- * building robust, powerful web applications using Vue and Laravel.
+/*
+ |--------------------------------------------------------------------------
+ | Scripts do catálogo público
+ |--------------------------------------------------------------------------
+ |
+ | O Alpine.js vem junto com o Livewire 3 (carregado via @livewireScripts).
+ | Aqui ficam o Croppie (crop de capa) e os helpers globais do site.
+ |
  */
 
-require('./bootstrap');
+import Croppie from 'croppie';
+import 'croppie/croppie.css';
 
-window.Vue = require('vue');
+window.Croppie = Croppie;
 
-/**
- * The following block of code may be used to automatically register your
- * Vue components. It will recursively scan this directory for the Vue
- * components and automatically register them with their "basename".
- *
- * Eg. ./components/ExampleComponent.vue -> <example-component></example-component>
- */
+window.FDA = {
+    /**
+     * Formata bytes em texto legível (ex.: 1.4 GB).
+     */
+    formatBytes(bytes, decimals = 1) {
+        if (!bytes || bytes <= 0) return '0 B';
 
-// const files = require.context('./', true, /\.vue$/i)
-// files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
+        const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
 
-Vue.component('example-component', require('./components/ExampleComponent.vue').default);
-
-/**
- * Next, we will create a fresh Vue application instance and attach it to
- * the page. Then, you may begin adding components to this application
- * or customize the JavaScript scaffolding to fit your unique needs.
- */
-
-const app = new Vue({
-    el: '#app',
-});
+        return `${(bytes / Math.pow(1024, i)).toFixed(i === 0 ? 0 : decimals)} ${units[i]}`;
+    },
+};

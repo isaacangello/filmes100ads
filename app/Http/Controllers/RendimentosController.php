@@ -6,17 +6,9 @@ use Illuminate\Http\Request;
 
 class RendimentosController extends Controller
 {
-    //
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
     public function index(Request $request)
     {
-            return view(
-                'adm.rendimentos'
-            );
+        return view('adm.earnings');
     }
 
 }

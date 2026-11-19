@@ -1,155 +1,47 @@
-@extends('layouts.app')
+@extends('layouts.guest')
 
-@section('nomepagina')
-    Filmes sem ADS - Criar nova Senha
-@endsection
+@section('title', 'Criar nova senha — Filmes sem ADS')
 
 @section('content')
-    <div class="container">
-        <div class="card card-register mx-auto mt-5">
-            <div class="card-header">Resetar Senha (Proximo  passo é criar um nova senha.)</div>
-            <div class="card-body">
-                <form class="form-horizontal" method="POST" action="{{ route('password.request') }}">
-                    {{ csrf_field() }}
+<div class="rounded-2xl border border-line bg-ink-800 p-8 shadow-card">
+    <h1 class="text-2xl font-extrabold tracking-tight">Criar nova senha</h1>
+    <p class="mt-1.5 text-sm text-muted">Escolha uma senha nova para acessar sua conta.</p>
 
-                    <input type="hidden" name="token" value="{{ $token }}">
-
-                    <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
-                        <div class="form-label-group">
-                            <input name="email" value="{{ $email or old('email') }}" type="email" id="inputEmail" class="form-control" placeholder="Email address" required="required">
-
-                            @if ($errors->has('email'))
-                                <span class="help-block">
-                                            <strong>{{ $errors->first('email') }}</strong>
-                                </span>
-                            @endif
-
-<!-- -->
-                            <label for="inputEmail">Email address</label>
-                        </div>
-                    </div>
-                    <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}{{ $errors->has('password_confirmation') ? ' has-error' : '' }}">
-                        <div class="form-row">
-                            <div class="col-md-6">
-                                <div class="form-label-group">
-                                    <input name="password" type="password" id="inputPassword" class="form-control" placeholder="Password" required="required">
-
-                                    @if ($errors->has('password'))
-                                        <span class="help-block">
-                                            <strong>{{ $errors->first('password') }}</strong>
-                                        </span>
-                                    @endif
-
-                                    <label for="inputPassword">Password</label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-label-group">
-                                    <input name="password_confirmation"  type="password" id="confirmPassword" class="form-control" placeholder="Confirm password" required="required">
-
-                                        @if ($errors->has('password_confirmation'))
-                                            <span class="help-block">
-                                                <strong>{{ $errors->first('password_confirmation') }}</strong>
-                                            </span>
-                                        @endif
-
-
-                                    <label for="confirmPassword">Confirm password</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%">
-                        Criar nova senha
-                    </button>
-                </form>
-                <div class="text-center">
-                    <a class="d-block small mt-3" href="{{url('/register')}}">Register an Account</a>
-                    <a class="d-block small" href="{{ url('/login') }}">Login Page</a>
-                </div>
-            </div>
+    @if ($errors->any())
+        <div class="mt-5 rounded-lg border border-red-500/40 bg-red-500/12 px-4 py-3 text-sm text-red-300">
+            {{ $errors->first() }}
         </div>
-    </div>
-<!--
-<div class="container" style="clear: both;">
+    @endif
 
-    <div class="card card-login mx-auto mt-5">
-        <div class="card-header">Resetar Senha</div>
-        <div class="card-body">
-            <div class="text-center mb-4">
-                <h5>Gerar Nova senha</h5>
-                <p>Proximo  passo é criar um nova senha.</p>
-            </div>
-            <form class="form-horizontal" method="POST" action="{{ route('password.request') }}">
-                {{ csrf_field() }}
+    <form method="POST" action="{{ route('password.update') }}" class="mt-6 space-y-4">
+        @csrf
+        <input type="hidden" name="token" value="{{ $token }}">
 
-                <input type="hidden" name="token" value="{{ $token }}">
-
-                <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
-                    <div class="form-label-group">
-                        <label for="email">E-Mail Address</label>
-
-                            <input id="email" type="email" class="form-control" name="email" value="{{ $email or old('email') }}" required autofocus>
-
-                            @if ($errors->has('email'))
-                                <span class="help-block">
-                                            <strong>{{ $errors->first('email') }}</strong>
-                                </span>
-                            @endif
-                    </div>
-                </div>
-
-                <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
-
-                    <div class="form-label-group">
-                        <label for="password" class="control-label">Password</label>
-
-
-                            <input id="password" type="password" class="form-control" name="password" required>
-
-                            @if ($errors->has('password'))
-                                <span class="help-block">
-                                        <strong>{{ $errors->first('password') }}</strong>
-                                </span>
-                            @endif
-                    </div>
-
-                </div>
-
-                <div class="form-group{{ $errors->has('password_confirmation') ? ' has-error' : '' }}">
-                    <div class="form-label-group">
-                        <label for="password-confirm" class="control-label">Confirm Password</label>
-
-                            <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required>
-
-                            @if ($errors->has('password_confirmation'))
-                                <span class="help-block">
-                                        <strong>{{ $errors->first('password_confirmation') }}</strong>
-                                </span>
-                            @endif
-                    </div>
-
-                </div>
-
-                <div class="form-group">
-
-                        <button type="submit" class="btn btn-primary" style="width: 100%">
-                            Criar senha
-                        </button>
-
-                </div>
-
-
-            </form>
-            <div class="text-center">
-                <a class="d-block small mt-3" href="{{url('/register')}}">Register an Account</a>
-                <a class="d-block small" href="{{ url('/login') }}">Login Page</a>
-            </div>
+        <div>
+            <label for="email" class="fda-label">E-mail</label>
+            <input id="email" type="email" name="email" value="{{ old('email', $email ?? '') }}" required autocomplete="email" autofocus
+                class="fda-input @error('email') border-red-500/60 @enderror">
+            @error('email')
+                <span class="mt-1 block text-xs text-red-400">{{ $message }}</span>
+            @enderror
         </div>
-    </div>
+
+        <div>
+            <label for="password" class="fda-label">Nova senha</label>
+            <input id="password" type="password" name="password" required autocomplete="new-password"
+                class="fda-input @error('password') border-red-500/60 @enderror">
+            @error('password')
+                <span class="mt-1 block text-xs text-red-400">{{ $message }}</span>
+            @enderror
+        </div>
+
+        <div>
+            <label for="password-confirm" class="fda-label">Confirme a nova senha</label>
+            <input id="password-confirm" type="password" name="password_confirmation" required autocomplete="new-password"
+                class="fda-input">
+        </div>
+
+        <button type="submit" class="fda-btn fda-btn-primary w-full">Salvar nova senha</button>
+    </form>
 </div>
-
--->
-
-
 @endsection

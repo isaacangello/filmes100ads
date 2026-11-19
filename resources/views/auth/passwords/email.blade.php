@@ -1,87 +1,41 @@
-@extends('layouts.app')
+@extends('layouts.guest')
 
-@section('nomepagina')
-    Filmes sem ADS - Resetar Senha
-@endsection
+@section('title', 'Recuperar senha — Filmes sem ADS')
 
 @section('content')
-<div class="container">
-    <div class="card card-login mx-auto mt-5">
-        <div class="card-header">Resetar Senha</div>
-        <div class="card-body">
-            <div class="text-center mb-4">
-                <h4>Perdeu a senha?</h4>
-                <p>Insira seu email para receber instruções para recuperar sua senha.</p>
-            </div>
-            <form class="form-horizontal" method="POST" action="{{ route('password.email') }}">
-                {{ csrf_field() }}
-                <div class="form-group">
-                    <div class="form-label-group">
-                        <input type="email" id="inputEmail" name="email" value="{{ old('email') }}" class="form-control" placeholder="Enter email address" required="required" autofocus="autofocus">
+<div class="rounded-2xl border border-line bg-ink-800 p-8 shadow-card">
+    <h1 class="text-2xl font-extrabold tracking-tight">Recuperar senha</h1>
+    <p class="mt-1.5 text-sm text-muted">Informe seu e-mail e enviaremos as instruções para criar uma nova senha.</p>
 
-                        @if ($errors->has('email'))
-                            <span class="help-block">
-                                        <strong>{{ $errors->first('email') }}</strong>
-                                    </span>
-                        @endif
-
-                        <label for="inputEmail">Enter email address</label>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">
-                    Send Password Reset Link
-                </button>
-            </form>
-            <div class="text-center">
-                <a class="d-block small mt-3" href="{{ url('register') }}">Registrar Conta</a>
-                <a class="d-block small" href="{{ url('login') }}">Fazer Login</a>
-            </div>
+    @if (session('status'))
+        <div class="mt-5 rounded-lg border border-emerald-500/35 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+            {{ session('status') }}
         </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="mt-5 rounded-lg border border-red-500/40 bg-red-500/12 px-4 py-3 text-sm text-red-300">
+            {{ $errors->first() }}
+        </div>
+    @endif
+
+    <form method="POST" action="{{ route('password.email') }}" class="mt-6 space-y-4">
+        @csrf
+
+        <div>
+            <label for="email" class="fda-label">E-mail</label>
+            <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus
+                class="fda-input @error('email') border-red-500/60 @enderror">
+            @error('email')
+                <span class="mt-1 block text-xs text-red-400">{{ $message }}</span>
+            @enderror
+        </div>
+
+        <button type="submit" class="fda-btn fda-btn-primary w-full">Enviar instruções</button>
+    </form>
+
+    <div class="mt-6 text-center text-sm text-muted">
+        <a href="{{ route('login') }}" class="font-semibold text-white transition hover:text-brand-hover">Voltar para o login</a>
     </div>
 </div>
-<!--
-
-    <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-            <div class="panel panel-default">
-                <div class="panel-heading">Reset Password</div>
-
-                <div class="panel-body">
-                    @if (session('status'))
-                        <div class="alert alert-success">
-                            {{ session('status') }}
-                        </div>
-                    @endif
-
-                    <form class="form-horizontal" method="POST" action="{{ route('password.email') }}">
-                        {{ csrf_field() }}
-
-                        <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
-                            <label for="email" class="col-md-4 control-label">E-Mail Address</label>
-
-                            <div class="col-md-6">
-                                <input id="email" type="email" class="form-control" name="email" value="{{ old('email') }}" required>
-
-                                @if ($errors->has('email'))
-                                    <span class="help-block">
-                                        <strong>{{ $errors->first('email') }}</strong>
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="col-md-6 col-md-offset-4">
-                                <button type="submit" class="btn btn-primary">
-                                    Send Password Reset Link
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
--->
 @endsection

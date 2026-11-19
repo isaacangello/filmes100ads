@@ -1,13 +1,13 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\Categoria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Input;
-use Intervention\Image\Facades\Image;
-use Validator;
+use Illuminate\Support\Facades\Validator;
+use Intervention\Image\Laravel\Facades\Image;
 
 class CadController extends Controller
 {
@@ -18,11 +18,9 @@ class CadController extends Controller
 
     public function index(Request $request)
     {
-        $var = Input::all();
+        $paises = $this->paises();
 
-        $paises = Collection::make( json_decode(file_get_contents('./storage/paises-array.json')));
-
-        return view('adm.cadastro', ['paises' => $paises]);
+        return view('adm.movies.form', ['paises' => $paises, 'categorias' => $this->categorias()]);
         //$callback = $request->name;
     }
 
@@ -49,15 +47,15 @@ class CadController extends Controller
             'max' => 'a :attribute deve ter um tamanho máximo de 5mb ',
         ];
 
-        $paises = Collection::make( json_decode(file_get_contents('./storage/paises-array.json')));
+        $paises = $this->paises();
         $validator = Validator::make($request->all(), $regras, $messages)->validate();
         if($request->tocrop == 1 ){
             $request->session()->put('postdatasave',$request->except('capa') );
             //dd($request->session()->all());
             $upload = $request->capa->storeAs('public/temp', 'tempimage'.Auth::user()->id.'.jpg');
-            return view('adm.crop', ['tmpimage' => $upload ]);
+            return view('adm.movies.crop', ['tmpimage' => $upload ]);
         }else{
-            return view('adm.cadastro', ['paises' => $paises]);
+            return view('adm.movies.form', ['paises' => $paises, 'categorias' => $this->categorias()]);
         }
 
         }
@@ -88,7 +86,7 @@ class CadController extends Controller
             'categoria_id' => $data['categoria'],
         ]);
 
-        if($data['url1']) {
+        if(!empty($data['url1'])) {
             DB::table('urls')->insert([
                 'post_id' => $insert_post_id,
                 'label' => $data['labelurl1'],
@@ -96,35 +94,35 @@ class CadController extends Controller
             ]);
         }
 
-        if($data['url2']) {
+        if(!empty($data['url2'])) {
             DB::table('urls')->insert([
                 'post_id' => $insert_post_id,
                 'label' => $data['labelurl2'],
                 'url' => $data['url2'],
             ]);
         }
-        if($data['url3']) {
+        if(!empty($data['url3'])) {
             DB::table('urls')->insert([
                 'post_id' => $insert_post_id,
                 'label' => $data['labelurl3'],
                 'url' => $data['url3'],
             ]);
         }
-        if($data['url4']) {
+        if(!empty($data['url4'])) {
             DB::table('urls')->insert([
                 'post_id' => $insert_post_id,
                 'label' => $data['labelurl4'],
                 'url' => $data['url4'],
             ]);
         }
-        if($data['url5']) {
+        if(!empty($data['url5'])) {
             DB::table('urls')->insert([
                 'post_id' => $insert_post_id,
                 'label' => $data['labelurl5'],
                 'url' => $data['url5'],
             ]);
         }
-        if($data['url6']) {
+        if(!empty($data['url6'])) {
             DB::table('urls')->insert([
                 'post_id' => $insert_post_id,
                 'label' => $data['labelurl6'],
@@ -132,16 +130,41 @@ class CadController extends Controller
             ]);
         }
         if($request->get('crop')){
+            $diretorioCapas = storage_path('app/public/capas');
+            if (! is_dir($diretorioCapas)) {
+                mkdir($diretorioCapas, 0755, true);
+            }
 
-            $image_temp = Image::make('storage/temp/tempimage'.Auth::user()->id.'.jpg');
-            $image_temp->crop(ceil($request->get('w')),ceil($request->get('h')),$request->get('x'),$request->get('y'));
-            $image_temp->save('storage/capas/image'.$insert_post_id.'.jpg');
+            Image::decodePath(storage_path('app/public/temp/tempimage'.Auth::user()->id.'.jpg'))
+                ->crop((int) ceil($request->get('w')), (int) ceil($request->get('h')), (int) $request->get('x'), (int) $request->get('y'))
+                ->save($diretorioCapas.'/image'.$insert_post_id.'.jpg');
         }
-        $paises = Collection::make( json_decode(file_get_contents('./storage/paises-array.json')));
+        $paises = $this->paises();
         return view(
-            'adm.cadastro',
-            [ 'sucess' => "Cadastro Efetuado con sucesso."],
-            ['paises' => $paises]
+            'adm.movies.form',
+            [
+                'sucess' => 'Cadastro efetuado com sucesso.',
+                'paises' => $paises,
+                'categorias' => $this->categorias(),
+            ]
+        );
+    }
+
+    /**
+     * Categorias usadas no formulário de cadastro.
+     */
+    private function categorias(): Collection
+    {
+        return Categoria::all();
+    }
+
+    /**
+     * Lista de países usada no formulário de cadastro.
+     */
+    private function paises(): Collection
+    {
+        return Collection::make(
+            json_decode(file_get_contents(storage_path('app/public/paises-array.json')))
         );
     }
 

@@ -1,0 +1,248 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+/* ======================================================================
+   Filmes sem ADS — tokens do tema (Tailwind v4)
+   ====================================================================== */
+@theme {
+    --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+    /* Fundos e superfícies */
+    --color-ink-950: #0b0b10;
+    --color-ink-900: #101017;
+    --color-ink-850: #14141c;
+    --color-ink-800: #17171f;
+    --color-ink-700: #1f1f2a;
+    --color-ink-600: #2c2c39;
+    --color-ink-500: #3b3b4b;
+
+    /* Texto */
+    --color-chalk: #f4f4f6;
+    --color-muted: #9c9cab;
+    --color-faint: #6b6b7a;
+
+    /* Acento */
+    --color-brand: #e50914;
+    --color-brand-hover: #ff2733;
+    --color-brand-soft: rgb(229 9 20 / 0.14);
+
+    /* Bordas */
+    --color-line: rgb(255 255 255 / 0.08);
+    --color-line-strong: rgb(255 255 255 / 0.16);
+
+    /* Raios */
+    --radius-card: 12px;
+    --radius-panel: 16px;
+
+    /* Sombras */
+    --shadow-card: 0 12px 30px rgb(0 0 0 / 0.45);
+    --shadow-card-hover: 0 18px 44px rgb(0 0 0 / 0.65);
+}
+
+/* ======================================================================
+   Base
+   ====================================================================== */
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        background-color: var(--color-ink-950);
+        color: var(--color-chalk);
+        font-family: var(--font-sans);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    ::selection {
+        background-color: var(--color-brand);
+        color: #fff;
+    }
+
+    /* Scrollbar discreta */
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-ink-600) var(--color-ink-950);
+    }
+
+    *::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    *::-webkit-scrollbar-track {
+        background-color: var(--color-ink-950);
+    }
+
+    *::-webkit-scrollbar-thumb {
+        background-color: var(--color-ink-600);
+        border-radius: 999px;
+        border: 2px solid var(--color-ink-950);
+    }
+
+    *::-webkit-scrollbar-thumb:hover {
+        background-color: var(--color-ink-500);
+    }
+}
+
+/* ======================================================================
+   Componentes reutilizáveis do catálogo
+   ====================================================================== */
+@layer components {
+    .fda-card-surface {
+        background-color: var(--color-ink-800);
+        border: 1px solid var(--color-line);
+        border-radius: var(--radius-panel);
+    }
+
+    .fda-input {
+        width: 100%;
+        background-color: var(--color-ink-900);
+        border: 1px solid var(--color-line);
+        border-radius: 0.5rem;
+        padding: 0.6rem 0.85rem;
+        font-size: 0.9rem;
+        color: var(--color-chalk);
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .fda-input::placeholder {
+        color: var(--color-faint);
+    }
+
+    .fda-input:focus {
+        outline: none;
+        border-color: var(--color-brand);
+        box-shadow: 0 0 0 3px var(--color-brand-soft);
+    }
+
+    .fda-label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #cfcfda;
+        margin-bottom: 0.35rem;
+    }
+
+    .fda-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        padding: 0.5rem 1.05rem;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        font-size: 0.88rem;
+        font-weight: 600;
+        line-height: 1.2;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .fda-btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .fda-btn-primary {
+        background-color: var(--color-brand);
+        color: #fff;
+    }
+
+    .fda-btn-primary:hover {
+        background-color: var(--color-brand-hover);
+        color: #fff;
+    }
+
+    .fda-btn-ghost {
+        background-color: transparent;
+        border-color: var(--color-line-strong);
+        color: var(--color-chalk);
+    }
+
+    .fda-btn-ghost:hover {
+        background-color: var(--color-ink-700);
+        color: #fff;
+    }
+
+    .fda-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.3rem 0.8rem;
+        border-radius: 999px;
+        border: 1px solid var(--color-line);
+        background-color: var(--color-ink-800);
+        color: var(--color-muted);
+        font-size: 0.82rem;
+        font-weight: 500;
+        white-space: nowrap;
+        transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .fda-chip:hover {
+        color: #fff;
+        border-color: var(--color-line-strong);
+        background-color: var(--color-ink-700);
+    }
+
+    .fda-chip-active {
+        background-color: var(--color-brand-soft);
+        border-color: rgb(229 9 20 / 0.5);
+        color: #ff5a63;
+    }
+
+    .fda-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.3rem 0.75rem;
+        border-radius: 999px;
+        background-color: var(--color-ink-700);
+        border: 1px solid var(--color-line);
+        color: var(--color-chalk);
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .fda-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 0.88rem;
+    }
+
+    .fda-table thead th {
+        text-align: left;
+        padding: 0.75rem 1rem;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--color-muted);
+        background-color: var(--color-ink-850);
+        border-bottom: 1px solid var(--color-line);
+        white-space: nowrap;
+    }
+
+    .fda-table tbody td {
+        padding: 0.85rem 1rem;
+        border-bottom: 1px solid var(--color-line);
+        vertical-align: middle;
+    }
+
+    .fda-table tbody tr:hover {
+        background-color: rgb(255 255 255 / 0.02);
+    }
+}
+
+/* ======================================================================
+   Utilitários
+   ====================================================================== */
+@utility fda-scroll-x {
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}

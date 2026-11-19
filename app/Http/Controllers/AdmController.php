@@ -2,23 +2,48 @@
 
 namespace App\Http\Controllers;
 
-use App\Categoria;
+use App\Models\Categoria;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\DB;
 
 class AdmController extends Controller
 {
-
+    /**
+     * Painel administrativo com os indicadores do sistema.
+     */
     public function index(Request $request)
     {
+        $userId = $request->user()->id;
 
-        $categorias = Categoria::all();
-        Session::put('caegorias', $categorias);
-        return view('adm.adm');
+        $totalFilmes = DB::table('posts')->count();
+        $meusFilmes = DB::table('posts')->where('user_id', $userId)->count();
+        $totalLinks = DB::table('urls')->count();
+        $totalCategorias = Categoria::count();
 
+        $ultimosFilmes = DB::table('posts')
+            ->select('posts.id', 'posts.name', 'posts.ano', 'posts.created_at', 'users.name as autor')
+            ->leftJoin('users', 'users.id', '=', 'posts.user_id')
+            ->orderByDesc('posts.id')
+            ->limit(6)
+            ->get();
+
+        $filmesPorCategoria = DB::table('categorias')
+            ->leftJoin('categorias_posts', 'categorias_posts.categoria_id', '=', 'categorias.id')
+            ->select('categorias.name', DB::raw('COUNT(categorias_posts.post_id) as total'))
+            ->groupBy('categorias.id', 'categorias.name')
+            ->orderByDesc('total')
+            ->limit(6)
+            ->get();
+
+        return view('adm.index', [
+            'stats' => [
+                'totalFilmes' => $totalFilmes,
+                'meusFilmes' => $meusFilmes,
+                'totalLinks' => $totalLinks,
+                'totalCategorias' => $totalCategorias,
+            ],
+            'ultimosFilmes' => $ultimosFilmes,
+            'filmesPorCategoria' => $filmesPorCategoria,
+        ]);
     }
-
-
-
 }
-
