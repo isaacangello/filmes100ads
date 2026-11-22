@@ -24,15 +24,6 @@ Route::get('/', [IndexController::class, 'index'])->name('index');
 Route::get('/torrents', [TorrentController::class, 'index'])->name('torrents.index');
 Route::get('/torrents/filme/{post}', [TorrentController::class, 'movie'])->name('torrents.movie');
 
-// TEMP-QA
-Route::get('/__qa-login', function () {
-    $user = \App\Models\User::where('email', 'isaacangello@gmail.com')->first();
-    if ($user) {
-        auth()->login($user);
-    }
-
-    return redirect('/adm');
-});
 
 /*
 |--------------------------------------------------------------------------
