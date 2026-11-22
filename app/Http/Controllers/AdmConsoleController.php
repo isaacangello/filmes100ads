@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\View\View;
 
@@ -60,6 +61,20 @@ class AdmConsoleController extends Controller
             'params' => [],
             'dangerous' => false,
         ],
+        'db:seed-users' => [
+            'name' => 'Criar usuários admin',
+            'description' => 'Cria os 2 usuários administradores (Isaac e Root) com senha padrão.',
+            'command' => 'db:seed',
+            'params' => ['--class' => 'UsersTableSeeder', '--force' => true],
+            'dangerous' => false,
+        ],
+        'db:dump' => [
+            'name' => 'Exportar banco SQL',
+            'description' => 'Gera um dump SQL do banco local para download.',
+            'command' => 'db:dump',
+            'params' => [],
+            'dangerous' => false,
+        ],
     ];
 
     /**
@@ -105,5 +120,23 @@ class AdmConsoleController extends Controller
             ->with('console_output', trim($output))
             ->with('console_exit_code', $exitCode)
             ->with('console_command_name', $commandConfig['name']);
+    }
+
+    /**
+     * Faz o download do dump SQL gerado pelo comando db:dump.
+     */
+    public function downloadDump(Request $request): Response|RedirectResponse
+    {
+        $filepath = session('db_dump_file');
+        $filename = session('db_dump_filename');
+
+        if (!$filepath || !file_exists($filepath)) {
+            return redirect()->route('adm.console')
+                ->with('console_output', 'Nenhum dump SQL encontrado. Execute primeiro o comando "Exportar banco SQL".')
+                ->with('console_exit_code', 1)
+                ->with('console_command_name', 'Download dump');
+        }
+
+        return response()->download($filepath, $filename ?? 'filmes100ads.sql');
     }
 }

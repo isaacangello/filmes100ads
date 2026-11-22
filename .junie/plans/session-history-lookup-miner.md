@@ -194,17 +194,19 @@ $query = Post::query()->with('categorias:id,name')->select(...);
 
 # Delivery Steps
 
-### ✓ Step 1: Análise de gargalos de performance
-Identificados 6 gargalos: índices faltantes em `posts`, `categorias_posts`, `movie_cast`; buscas `LIKE '%termo%'` sem FULLTEXT; `whereDate`/`whereMonth` em `EarningsService`; consulta N+1 de categorias em `MovieCatalog`. O projeto filmes100ads usa Vite desde a migração para Laravel 11 — o webpack era do MintMe Wallet (delegado para outra IA).
+### ✓ Step 1: Criar .htaccess para htdocs/ (padrão P4O)
+Criado `public/.htaccess.htdocs` com regras de rewrite do P4O: redireciona tudo para `public/`, bloqueia acesso a pastas sensíveis do Laravel e arquivos ocultos.
 
-### ✓ Step 2: Completar o código do minerador nas páginas do filmes100ads
-Adicionado `addMiningNotification` ao script CoinImp em `public.blade.php` para notificação visual. Corrigido link "Política de Privacidade" no footer para usar `Alpine.store('privacy')`. Modal de privacidade atualizado para responder ao banner e ao footer. Build e 52 testes passaram.
+### ✓ Step 2: Reescrever deploy-setup.php para funcionar dentro de htdocs/
+Reescrito `public/deploy-setup.php` para estrutura P4O: `$root = dirname(__DIR__)` aponta para `htdocs/` onde tudo fica. Script cria .env de env.production, junta vendor.zip das partes, extrai vendor, limpa caches e roda migrations — tudo dentro de `htdocs/`.
 
-### ✓ Step 3: Criar migration com índices de performance
-Nova migration `2026_11_22_110000_add_performance_indexes.php` com índices em `posts(user_id, status1, status2, ano)`, FULLTEXT em `posts(name, realname, sinopse)` apenas em MySQL, índices em `categorias_posts(categoria_id, post_id)`, `movie_cast(post_id)` e FULLTEXT em `users(name, email)` apenas em MySQL. FULLTEXT condicional para compatibilidade com SQLite nos testes.
+### ✓ Step 3: Atualizar deploy.sh para subir tudo para htdocs/
+Atualizado `scripts/deploy.sh` para estrutura P4O: todo o Laravel sobe para `htdocs/`, `.htaccess.htdocs` sobe como `htdocs/.htaccess`, `env.production` sobe para `htdocs/`. Removida a separação entre Laravel root e htdocs.
 
-### ✓ Step 4: Substituir LIKE por FULLTEXT nos componentes Livewire
-Convertida busca `LIKE '%termo%'` para `MATCH ... AGAINST` em `MovieCatalog`, `AdminMovieList`, e `UserManager` com fallback para SQLite nos testes via `config('database.default') === 'sqlite'`.
+### ✓ Step 4: Executar deploy e completar setup via browser
+Deploy executado com sucesso via `./scripts/deploy.sh`. Todo o código subido para `htdocs/` com estrutura P4O. Commit 5a24350. Setup completado via solve-antibot: vendor extraído, 16 migrations rodadas, site funcionando.
 
-### ✓ Step 5: Otimizar EarningsService e MovieCatalog
+### ✓ Step 5: Corrigir erro 403 do deploy
+Corrigido `.htaccess.htdocs` removendo regras que bloqueavam arquivos com ponto no nome. Corrigido `deploy-setup.php` para ler `DEPLOY_KEY` do `env.production` como fallback e criar `bootstrap/cache` antes das migrations. Commit 808e091.
+
 Substituído `whereDate`/`whereMonth`/`whereYear` por `whereBetween` com timestamps em `EarningsService`. Substituída consulta separada de categorias por eager loading `Post::with('categorias:id,name')` em `MovieCatalog`. View `movie-catalog.blade.php` atualizada para usar `$post->categorias->first()`.

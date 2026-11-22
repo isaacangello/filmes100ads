@@ -87,5 +87,9 @@ Route::prefix('/adm')->middleware('auth')->group(function () {
         // Console de comandos (apenas admins).
         Route::get('console', [AdmConsoleController::class, 'index'])->name('adm.console');
         Route::post('console/execute', [AdmConsoleController::class, 'execute'])->name('adm.console.execute');
+
+        // Download do dump SQL gerado pelo comando db:dump.
+        Route::get('console/dump-download', [AdmConsoleController::class, 'downloadDump'])
+            ->name('adm.console.dump.download');
     });
 });

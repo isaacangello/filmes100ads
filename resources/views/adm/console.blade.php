@@ -22,6 +22,24 @@
         </p>
     </div>
 
+    {{-- Link de download do dump SQL --}}
+    @if (session('db_dump_file') && file_exists(session('db_dump_file')))
+        <div class="mb-6 rounded-xl border border-green-500/30 bg-green-500/10 p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <i class="fas fa-database text-green-400 mr-2"></i>
+                    <strong class="text-green-400">Dump SQL disponível</strong>
+                    <p class="mt-1 text-xs text-muted">
+                        Arquivo: {{ session('db_dump_filename', 'filmes100ads.sql') }}
+                    </p>
+                </div>
+                <a href="{{ route('adm.console.dump.download') }}" class="fda-btn fda-btn-primary text-xs">
+                    <i class="fas fa-download text-[0.6rem]"></i> Baixar SQL
+                </a>
+            </div>
+        </div>
+    @endif
+
     {{-- Resultado do último comando --}}
     @if ($lastOutput !== null)
         <div class="mb-6 overflow-hidden rounded-2xl border border-line bg-ink-800 shadow-card">

@@ -19,20 +19,25 @@ class UsersTableSeeder extends Seeder
                 'name' => 'Isaac',
                 'email' => 'isaacangello@gmail.com',
                 'password' => bcrypt('password'),
+                'is_admin' => true,
             ],
             [
                 'name' => 'Root',
                 'email' => 'isaacangello@inf.ufpel.edu.br',
                 'password' => bcrypt('password'),
+                'is_admin' => true,
             ],
         ];
 
         foreach ($users as $userData) {
-            // Evita duplicação se o seeder for executado mais de uma vez
-            User::firstOrCreate(
+            // Cria ou atualiza: se o usuário já existe, garante que é admin
+            $user = User::firstOrCreate(
                 ['email' => $userData['email']],
                 $userData
             );
+            if (! $user->is_admin) {
+                $user->update(['is_admin' => true]);
+            }
         }
     }
 }
