@@ -1,0 +1,43 @@
+name: Deploy to InfinityFree
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Deploy via FTP
+        env:
+          DOTENV: ${{ secrets.DOTENV }}
+        run: |
+          sudo apt-get install -y lftp
+          printf '%s\n' "$DOTENV" > /tmp/env_tmp
+          lftp -c "
+            set ftp:ssl-allow no;
+            set ftp:chmod-default '';
+            open ftp://${{ secrets.FTP_USER }}:${{ secrets.FTP_PASS }}@${{ secrets.FTP_HOST }};
+            mirror --reverse --delete --verbose --no-perms public/ /htdocs/;
+            cd /htdocs
+            put /tmp/env_tmp -o .env;
+            ls -la .env;
+            quit
+          "

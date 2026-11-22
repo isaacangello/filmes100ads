@@ -1,10 +1,11 @@
 <?php
 
+use App\Http\Controllers\AdmConsoleController;
 use App\Http\Controllers\AdmController;
+use App\Http\Controllers\AdmUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
-use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\CadController;
 use App\Http\Controllers\IndexController;
 use App\Http\Controllers\ListCadsController;
@@ -21,6 +22,17 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [IndexController::class, 'index'])->name('index');
 
 Route::get('/torrents', [TorrentController::class, 'index'])->name('torrents.index');
+Route::get('/torrents/filme/{post}', [TorrentController::class, 'movie'])->name('torrents.movie');
+
+// TEMP-QA
+Route::get('/__qa-login', function () {
+    $user = \App\Models\User::where('email', 'isaacangello@gmail.com')->first();
+    if ($user) {
+        auth()->login($user);
+    }
+
+    return redirect('/adm');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -35,9 +47,6 @@ Route::get('/torrents', [TorrentController::class, 'index'])->name('torrents.ind
 Route::middleware('guest')->group(function () {
     Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
-
-    Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
-    Route::post('register', [RegisteredUserController::class, 'store']);
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
     Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
@@ -61,7 +70,10 @@ Route::prefix('/adm')->middleware('auth')->group(function () {
 
     // Formulário de cadastro de filme.
     Route::get('cadastro', [CadController::class, 'index'])->name('cadastro.index');
-    Route::post('cadastro', [CadController::class, 'store'])->name('cadastro.store');
+    Route::get('cadastro/recortar', [CadController::class, 'crop'])->name('adm.movies.crop');
+
+    // Edição de filme existente.
+    Route::get('cadastro/{post}/editar', [CadController::class, 'edit'])->name('adm.movies.edit');
 
     // Filmes cadastrados pelo usuário.
     Route::get('meuscadastros', [ListCadsController::class, 'index'])->name('meuscadastros.index');
@@ -72,4 +84,17 @@ Route::prefix('/adm')->middleware('auth')->group(function () {
 
     // Rendimentos.
     Route::get('rendimentos', [RendimentosController::class, 'index'])->name('adm.rendimentos');
+
+    // Gerência de usuários (apenas admins).
+    Route::middleware('isAdmin')->group(function () {
+        Route::get('usuarios', [AdmUserController::class, 'index'])->name('adm.users.index');
+        Route::get('usuarios/criar', [AdmUserController::class, 'create'])->name('adm.users.create');
+        Route::post('usuarios', [AdmUserController::class, 'store'])->name('adm.users.store');
+        Route::put('usuarios/{user}', [AdmUserController::class, 'update'])->name('adm.users.update');
+        Route::delete('usuarios/{user}', [AdmUserController::class, 'destroy'])->name('adm.users.destroy');
+
+        // Console de comandos (apenas admins).
+        Route::get('console', [AdmConsoleController::class, 'index'])->name('adm.console');
+        Route::post('console/execute', [AdmConsoleController::class, 'execute'])->name('adm.console.execute');
+    });
 });

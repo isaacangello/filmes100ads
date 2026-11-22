@@ -56,9 +56,5 @@
         <button type="submit" class="fda-btn fda-btn-primary w-full">Entrar</button>
     </form>
 
-    <div class="mt-6 text-center text-sm text-muted">
-        Ainda não tem conta?
-        <a href="{{ route('register') }}" class="font-semibold text-white transition hover:text-brand-hover">Criar conta</a>
-    </div>
 </div>
 @endsection

@@ -2,13 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
+/**
+ * Controller da tela de rendimentos.
+ *
+ * A lógica de dados é delegada ao componente Livewire `EarningsDashboard`.
+ */
 class RendimentosController extends Controller
 {
-    public function index(Request $request)
+    /**
+     * Página de rendimentos do usuário.
+     */
+    public function index()
     {
         return view('adm.earnings');
     }
-
 }

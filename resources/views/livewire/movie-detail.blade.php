@@ -1,0 +1,181 @@
+<div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+
+    <a href="{{ route('index') }}" class="mb-5 inline-flex items-center gap-2 text-sm text-muted transition hover:text-white">
+        <i class="fas fa-arrow-left text-xs"></i> Voltar ao catálogo
+    </a>
+
+    {{-- ======================= DESTAQUE ======================= --}}
+    <div class="grid gap-8 rounded-2xl border border-line bg-gradient-to-br from-ink-800 to-ink-900 p-6 shadow-card lg:grid-cols-[260px_1fr] lg:p-7">
+        <div class="overflow-hidden rounded-xl border border-line bg-ink-700">
+            @if ($filme->poster_url)
+                <img src="{{ $filme->poster_url }}" alt="{{ $filme->name }}" class="w-full">
+            @elseif (file_exists(public_path('storage/capas/image'.$filme->id.'.jpg')))
+                <img src="{{ url('storage/capas/image'.$filme->id.'.jpg') }}" alt="{{ $filme->name }}" class="w-full">
+            @else
+                <div class="flex h-full min-h-[300px] items-center justify-center bg-ink-600 text-muted">
+                    <i class="fas fa-film text-4xl opacity-30"></i>
+                </div>
+            @endif
+        </div>
+
+        <div>
+            <h1 class="text-3xl font-extrabold tracking-tight lg:text-4xl">{{ $filme->name }}</h1>
+
+            @if ($filme->realname)
+                <p class="mt-1.5 text-sm text-muted">Título original: {{ $filme->realname }}</p>
+            @endif
+
+            <div class="mt-5 flex flex-wrap gap-2">
+                @if ($categoria)
+                    <span class="fda-badge"><i class="fas fa-tag text-[0.7rem] text-brand"></i> {{ $categoria }}</span>
+                @endif
+                @if ($filme->ano)
+                    <span class="fda-badge"><i class="fas fa-calendar text-[0.7rem] text-brand"></i> {{ $filme->ano }}</span>
+                @endif
+                @if ($filme->duracao)
+                    <span class="fda-badge"><i class="fas fa-clock text-[0.7rem] text-brand"></i> {{ $filme->duracao }} min</span>
+                @endif
+                @if ($filme->pais)
+                    <span class="fda-badge"><i class="fas fa-globe text-[0.7rem] text-brand"></i> {{ $filme->pais }}</span>
+                @endif
+                @if ($filme->diretor)
+                    <span class="fda-badge"><i class="fas fa-user text-[0.7rem] text-brand"></i> {{ $filme->diretor }}</span>
+                @endif
+                @if ($filme->vote_average)
+                    <span class="fda-badge" style="background:rgba(255,193,7,.12);color:#fbbf24;">
+                        <i class="fas fa-star text-[0.7rem]"></i> {{ number_format((float) $filme->vote_average, 1, ',', '.') }} / 10
+                    </span>
+                @endif
+                @if ($filme->original_language)
+                    <span class="fda-badge"><i class="fas fa-language text-[0.7rem] text-brand"></i> {{ strtoupper($filme->original_language) }}</span>
+                @endif
+            </div>
+
+            @if ($filme->sinopse)
+                <p class="mt-5 text-[0.96rem] leading-relaxed text-[#c9c9d4]">{{ $filme->sinopse }}</p>
+            @endif
+
+            <div class="mt-6 flex flex-wrap gap-3">
+                @if ($magnetLink || count($torrentResults) > 0)
+                    <a href="#torrents"
+                        class="fda-btn fda-btn-primary">
+                        <i class="fas fa-download text-xs"></i> Download Torrent
+                    </a>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    {{-- ======================= ELENCO ======================= --}}
+    @if ($filme->cast->isNotEmpty())
+        <div class="mt-8 border-t border-line pt-8">
+            <h2 class="mb-5 text-xl font-bold flex items-center gap-2">
+                <i class="fas fa-users text-brand"></i> Elenco
+            </h2>
+            <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                @foreach ($filme->cast as $ator)
+                    <div class="group rounded-xl border border-line bg-ink-800 p-3 transition-all hover:border-line-strong hover:shadow-card">
+                        @if ($ator->profile_path)
+                            <img src="https://image.tmdb.org/t/p/w185{{ $ator->profile_path }}"
+                                alt="{{ $ator->name }}"
+                                class="aspect-[2/3] w-full rounded-lg object-cover"
+                                loading="lazy">
+                        @else
+                            <div class="aspect-[2/3] w-full rounded-lg bg-ink-700 flex items-center justify-center">
+                                <i class="fas fa-user text-2xl text-muted opacity-30"></i>
+                            </div>
+                        @endif
+                        <div class="mt-3">
+                            <p class="text-sm font-semibold truncate">{{ $ator->name }}</p>
+                            @if ($ator->character)
+                                <p class="text-xs text-muted truncate">{{ $ator->character }}</p>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
+    {{-- ======================= DOWNLOAD TORRENT ======================= --}}
+    <div id="torrents" class="mt-8 border-t border-line pt-8">
+
+        {{-- Magnet link salvo --}}
+        @if ($magnetLink)
+            <div class="rounded-2xl border-2 border-brand/30 bg-gradient-to-br from-brand-soft/20 to-ink-900 p-8 text-center">
+                <div class="mx-auto max-w-md">
+                    <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-brand/20">
+                        <i class="fas fa-download text-2xl text-brand"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold">Download do Filme</h2>
+                    <p class="mt-2 text-sm text-muted">Clique no botão abaixo para abrir o link magnet no seu cliente de torrent.</p>
+                    <a href="{{ $magnetLink }}"
+                       class="mt-6 inline-flex items-center gap-3 rounded-xl bg-brand px-8 py-4 text-lg font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-brand-hover hover:shadow-xl"
+                       target="_blank" rel="noopener">
+                        <i class="fas fa-magnet text-xl"></i> Baixar via Torrent
+                    </a>
+                </div>
+            </div>
+        @elseif (count($torrentResults) > 0)
+            {{-- Lista de resultados da busca --}}
+            <div class="space-y-3">
+                <p class="text-xs text-faint">
+                    {{ count($torrentResults) }} resultado(s) encontrado(s)
+                </p>
+                @foreach ($torrentResults as $resultado)
+                    <div class="group rounded-xl border border-line bg-ink-800 p-4 transition-all hover:border-line-strong hover:shadow-card">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="flex h-6 w-6 items-center justify-center rounded bg-brand-soft text-[0.6rem] text-brand">
+                                        <i class="fas fa-download"></i>
+                                    </span>
+                                    <h3 class="truncate text-sm font-semibold">
+                                        {{ $resultado['title'] }}
+                                    </h3>
+                                </div>
+                                <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
+                                    @if ($resultado['size'] !== '' && $resultado['size'] !== '—')
+                                        <span title="Tamanho">
+                                            <i class="fas fa-weight-hanging text-[0.6rem]"></i>
+                                            {{ $resultado['size'] }}
+                                        </span>
+                                    @endif
+                                    @if ($resultado['seeders'] > 0)
+                                        <span title="Seeders" class="text-green-400">
+                                            <i class="fas fa-arrow-up text-[0.6rem]"></i>
+                                            {{ $resultado['seeders'] }}
+                                        </span>
+                                    @endif
+                                    @if ($resultado['leechers'] > 0)
+                                        <span title="Leechers">
+                                            <i class="fas fa-arrow-down text-[0.6rem]"></i>
+                                            {{ $resultado['leechers'] }}
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="flex shrink-0 items-center gap-2">
+                                @if ($resultado['magnet'] !== '')
+                                    <a href="{{ $resultado['magnet'] }}"
+                                       class="fda-btn fda-btn-primary"
+                                       title="Abrir link magnet"
+                                       target="_blank" rel="noopener">
+                                        <i class="fas fa-magnet text-xs"></i>
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            {{-- Nenhum torrent encontrado --}}
+            <div class="rounded-xl border border-dashed border-line bg-ink-800 p-6 text-center">
+                <i class="fas fa-circle-exclamation mb-2 block text-xl text-muted opacity-50"></i>
+                <p class="text-sm text-muted">Nenhum torrent encontrado para este filme.</p>
+            </div>
+        @endif
+    </div>
+
+</div>

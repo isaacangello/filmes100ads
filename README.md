@@ -14,8 +14,8 @@ LOGIN
 ADM
 CADASTRO DE USUÁRIOS
 CADASTRO DE LINKS
-RENDIMENTOS (NÃO IMPLEMENTADO) 
-
+RENDIMENTOS (IMPLEMENTADO - tracking de visualizações)
+BUSCA DE TORRENTS (IMPLEMENTADO - 3 fontes públicas)
  ```
     
 ### Observação.
@@ -57,7 +57,7 @@ empacotado pelo **Vite**. O Bootstrap 4, o SB Admin 2 e o jQuery foram removidos
    cp .env.example .env
    php artisan key:generate
    php artisan migrate
-   php artisan db:seed   # opcional: popula categorias + 5000 filmes de exemplo
+   php artisan db:seed   # opcional: popula com filmes reais da TMDB API
    php artisan storage:link
    ```
 3. Compile os assets (ou rode o Vite em watch):
@@ -77,5 +77,57 @@ empacotado pelo **Vite**. O Bootstrap 4, o SB Admin 2 e o jQuery foram removidos
 
 ### Dados de exemplo
 
-Após `db:seed`, são criados 5000 filmes fictícios distribuídos em categorias.
-Cadastre um usuário pela tela `/register` para acessar a área ADM.
+O seeder usa a **TMDB API** para buscar filmes reais dos últimos 20 anos (2006–2026) com trailers do YouTube.
+
+1. Obtenha uma chave gratuita em [https://www.themoviedb.org/settings/api](https://www.themoviedb.org/settings/api)
+2. Adicione ao `.env`: `TMDB_API_KEY=sua_chave_aqui`
+3. Execute: `php artisan db:seed --class=TmdbMoviesSeeder`
+
+Sem a chave configurada, o seeder mostra uma mensagem e pula a importação.
+
+Dois usuários são pré-cadastrados automaticamente:
+- `isaacangello@gmail.com` / `password`
+- `isaacangello@inf.ufpel.edu.br` / `password`
+
+---
+
+## Funcionalidades Implementadas
+
+### Busca de Torrents
+Componente Livewire que agrega resultados de 3 fontes públicas configuráveis:
+- **SolidTorrents** — API pública de torrents
+- **Nyaa** — Tracker público de torrents
+- **Archive.org** — Acervo público de domínio público
+
+Configuração em `config/torrents.php` para ativar/desativar fontes manualmente.
+Cache de 5 minutos e timeout de 5 segundos por provider.
+
+### Rendimentos
+Sistema de tracking de visualizações com dashboard no ADM:
+- Registro automático ao visualizar filmes
+- Deduplicação por IP hash
+- Cálculo de ganhos baseado em visualizações
+- Histórico de saques com status
+
+### Melhorias no ADM
+- Filtros por `status1`/`status2` na lista de filmes
+- Exclusão de filmes com confirmação (Alpine.js modal)
+- Verificação de ownership (apenas dono pode excluir)
+- Edição completa em `/adm/cadastro/{post}/editar`, com dados pré-preenchidos
+- Atualização de categoria e servidores, mantendo ou substituindo a capa com recorte
+
+### Dados Reais via TMDB API
+O seeder `TmdbMoviesSeeder` busca filmes reais da TMDB API:
+- Até 20.000 filmes dos últimos 20 anos
+- Dados completos: título, sinopse, ano, duração, país, gêneros
+- 1 trailer do YouTube por filme como primeiro servidor
+- Categorias mapeadas automaticamente dos gêneros TMDB
+
+---
+
+## Arquivos de Acompanhamento
+
+- `AGENTS.md` — Diretrizes do projeto para agentes de IA
+- `TODO.md` — Lista de pendências organizadas por prioridade
+- `ESTADO-DO-PROJETO.md` — Resumo completo do estado atual
+- `ANALISE-NVIDIA-CONTENT-SAFETY.md` — Investigação do erro de content safety

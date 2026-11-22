@@ -8,7 +8,7 @@
     <title>@yield('title', 'Área ADM — Filmes sem ADS')</title>
 
     <link rel="icon" href="{{ asset('favicon.ico') }}">
-    <link rel="stylesheet" href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
@@ -89,6 +89,29 @@
                     </a>
                 </div>
             </div>
+
+            @if (auth()->user()->isAdmin())
+            <div>
+                <p class="px-3 pb-2 text-[0.68rem] font-bold tracking-[0.12em] text-faint uppercase">Sistema</p>
+                <div class="space-y-1">
+                    <a href="{{ route('adm.users.index') }}"
+                        class="group relative flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium transition {{ request()->routeIs('adm.users.*') ? 'bg-brand-soft text-white' : 'text-muted hover:bg-ink-800 hover:text-white' }}">
+                        @if (request()->routeIs('adm.users.*'))
+                            <span class="absolute inset-y-2 left-0 w-0.5 rounded-full bg-brand"></span>
+                        @endif
+                        <i class="fas fa-users-gear w-4 text-xs"></i> Usuários
+                    </a>
+
+                    <a href="{{ route('adm.console') }}"
+                        class="group relative flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium transition {{ request()->routeIs('adm.console') ? 'bg-brand-soft text-white' : 'text-muted hover:bg-ink-800 hover:text-white' }}">
+                        @if (request()->routeIs('adm.console'))
+                            <span class="absolute inset-y-2 left-0 w-0.5 rounded-full bg-brand"></span>
+                        @endif
+                        <i class="fas fa-terminal w-4 text-xs"></i> Console
+                    </a>
+                </div>
+            </div>
+            @endif
         </nav>
 
         <div class="shrink-0 border-t border-line p-4">

@@ -43,6 +43,11 @@
    Base
    ====================================================================== */
 @layer base {
+    /* Esconde elementos x-cloak do Alpine.js antes do JS carregar */
+    [x-cloak] {
+        display: none !important;
+    }
+
     html {
         scroll-behavior: smooth;
     }
