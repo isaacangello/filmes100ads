@@ -33,8 +33,16 @@ $root = dirname(__DIR__);
 $envFile = $root . '/.env';
 
 $DEPLOY_KEY = getenv('DEPLOY_KEY') ?: '';
+// Read from .env if it exists
 if (!$DEPLOY_KEY && file_exists($envFile)) {
     $envContent = file_get_contents($envFile);
+    if (preg_match('/^DEPLOY_KEY=(.+)$/m', $envContent, $m)) {
+        $DEPLOY_KEY = trim($m[1], '"\'');
+    }
+}
+// Fallback: read from env.production (first run, before .env is created)
+if (!$DEPLOY_KEY && file_exists($root . '/env.production')) {
+    $envContent = file_get_contents($root . '/env.production');
     if (preg_match('/^DEPLOY_KEY=(.+)$/m', $envContent, $m)) {
         $DEPLOY_KEY = trim($m[1], '"\'');
     }
@@ -178,14 +186,16 @@ if ($action === 'setup') {
         }
     }
 
-    // Step 3: Clear bootstrap cache
+    // Step 3: Ensure bootstrap/cache exists and is writable
     $cacheDir = $root . '/bootstrap/cache';
-    if (is_dir($cacheDir)) {
-        foreach (glob($cacheDir . '/*.php') as $cacheFile) {
-            @unlink($cacheFile);
-        }
-        $output .= logMsg("bootstrap/cache cleared");
+    if (!is_dir($cacheDir)) {
+        mkdir($cacheDir, 0755, true);
     }
+    chmod($cacheDir, 0777);
+    foreach (glob($cacheDir . '/*.php') as $cacheFile) {
+        @unlink($cacheFile);
+    }
+    $output .= logMsg("bootstrap/cache ensured and cleared");
 
     // Step 4: Clear stale config caches
     $frameworkCache = $root . '/storage/framework/cache';
