@@ -1,0 +1,27 @@
+# .htaccess para a raiz do htdocs/ no InfinityFree
+# Redireciona todas as requisições para public/ e bloqueia acesso a pastas sensíveis
+# Baseado no .htaccess do P4O que funciona no InfinityFree
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Bloquear acesso direto a pastas sensíveis do Laravel
+    RewriteRule ^(app|bootstrap|config|database|resources|routes|storage|vendor)/ - [F,L]
+
+    # Bloquear acesso a arquivos ocultos (incluindo .env)
+    RewriteCond %{REQUEST_URI} "^/\.well-known/" [OR]
+    RewriteCond %{REQUEST_URI} "\."
+    RewriteRule "(^|/)\." - [S=3]
+    RewriteRule "\." - [F,L]
+
+    # Bloquear acesso a arquivos de configuração
+    RewriteRule ^(composer\.json|composer\.lock|artisan|\.env)$ - [F,L]
+
+    # Redirecionar tudo para public/
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
