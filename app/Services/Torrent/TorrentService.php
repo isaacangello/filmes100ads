@@ -3,6 +3,7 @@
 namespace App\Services\Torrent;
 
 use App\Services\Torrent\Providers\ArchiveOrgProvider;
+use App\Services\Torrent\Providers\BaixetorrentProvider;
 use App\Services\Torrent\Providers\BitSearchProvider;
 use App\Services\Torrent\Providers\NyaaProvider;
 use App\Services\Torrent\Providers\SolidTorrentsProvider;
@@ -45,6 +46,7 @@ class TorrentService
                 'solidtorrents' => new SolidTorrentsProvider($providerConfig),
                 'nyaa' => new NyaaProvider($providerConfig),
                 'archiveorg' => new ArchiveOrgProvider($providerConfig),
+                'baixetorrent' => new BaixetorrentProvider($providerConfig),
                 default => null,
             };
 

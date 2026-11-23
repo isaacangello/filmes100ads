@@ -220,5 +220,8 @@ A view `pagination::fda` existia em `resources/views/vendor/pagination/fda.blade
 ### ✓ Step 8: Criar usuários admin no servidor
 Os usuários admin não existiam no banco de produção, impedindo login. Criado `public/setup-users.php` (script auto-destrutivo protegido por DEPLOY_KEY) que cria Isaac e Root com `is_admin=true` e senha "password". Script executado com sucesso via solve-antibot.
 
-### * Step 9: Popular filmes no servidor via console ADM
-O servidor tem ~3000 filmes. O usuário precisa acessar `/adm/console` logado e clicar em "Popular filmes TMDB" para buscar os 10.000 filmes da API TMDB.
+### ! Step 9: Popular filmes no servidor via console ADM
+O seed travou em 1669 filmes porque o InfinityFree mata o PHP após ~60 segundos. O `setup-tmdb.php` (script via navegador) também falhou com 504 Gateway Time-out. Preciso de uma solução baseada em lotes via AJAX.
+
+### ✓ Step 10: Seed TMDB por lotes via AJAX
+Implementado sistema de seed por lotes: `seedTmdb()` inicializa (limpa dados, cria categorias), `seedTmdbBatch()` processa uma página da TMDB (~20 filmes) por chamada. JavaScript faz chamadas repetidas via AJAX, cada uma retornando em ~10-15 segundos, sem timeout. Deploy concluído, site respondendo com 106KB.

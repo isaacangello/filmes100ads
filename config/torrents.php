@@ -42,6 +42,13 @@ return [
             'headers' => [],
         ],
 
+        'baixetorrent' => [
+            'enabled' => true,
+            'base_url' => 'https://www.baixetorrent.org',
+            'timeout' => 10,
+            'headers' => [],
+        ],
+
         /*
         | Exemplo de provider customizado:
         |

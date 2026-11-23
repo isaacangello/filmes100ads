@@ -99,9 +99,72 @@
 
     {{-- ======================= DOWNLOAD TORRENT ======================= --}}
     <div id="torrents" class="mt-8 border-t border-line pt-8">
+        <h2 class="mb-5 text-xl font-bold flex items-center gap-2">
+            <i class="fas fa-download text-brand"></i> Downloads
+        </h2>
 
-        {{-- Magnet link salvo --}}
-        @if ($magnetLink)
+        {{-- Torrents salvos agrupados por qualidade --}}
+        @if ($torrentsByQuality->isNotEmpty())
+            @php
+                // Ordem de qualidade: 4K > 1080p > 720p > 480p > BluRay > WEB-DL > null
+                $qualityOrder = ['4K' => 1, '1080p' => 2, '720p' => 3, '480p' => 4, 'BluRay' => 5, 'WEB-DL' => 6, null => 7];
+                $qualityLabels = [
+                    '4K' => '<i class="fas fa-crown text-[0.6rem]"></i> 4K Ultra HD',
+                    '1080p' => '<i class="fas fa-video text-[0.6rem]"></i> 1080p Full HD',
+                    '720p' => '<i class="fas fa-film text-[0.6rem]"></i> 720p HD',
+                    '480p' => '<i class="fas fa-mobile-alt text-[0.6rem]"></i> 480p SD',
+                    'BluRay' => '<i class="fas fa-compact-disc text-[0.6rem]"></i> BluRay',
+                    'WEB-DL' => '<i class="fas fa-cloud-download-alt text-[0.6rem]"></i> WEB-DL',
+                ];
+                $qualityColors = [
+                    '4K' => 'from-purple-500/20 to-purple-900/20 border-purple-500/30',
+                    '1080p' => 'from-blue-500/20 to-blue-900/20 border-blue-500/30',
+                    '720p' => 'from-green-500/20 to-green-900/20 border-green-500/30',
+                    '480p' => 'from-yellow-500/20 to-yellow-900/20 border-yellow-500/30',
+                    'BluRay' => 'from-cyan-500/20 to-cyan-900/20 border-cyan-500/30',
+                    'WEB-DL' => 'from-orange-500/20 to-orange-900/20 border-orange-500/30',
+                ];
+            @endphp
+
+            @foreach ($torrentsByQuality->sortBy(function ($items, $quality) use ($qualityOrder) {
+                return $qualityOrder[$quality] ?? 7;
+            }) as $quality => $torrents)
+                <div class="mb-6">
+                    <h3 class="mb-3 text-sm font-bold text-muted uppercase tracking-wider">
+                        {!! $qualityLabels[$quality] ?? '<i class="fas fa-question text-[0.6rem]"></i> Outros' !!}
+                    </h3>
+                    <div class="space-y-2">
+                        @foreach ($torrents as $torrent)
+                            <div class="group flex items-center justify-between gap-4 rounded-xl border border-line bg-gradient-to-r {{ $qualityColors[$quality] ?? 'from-ink-500/10 to-ink-900/10 border-line' }} p-4 transition-all hover:border-line-strong hover:shadow-card">
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate text-sm font-semibold">{{ $torrent->title }}</p>
+                                    <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
+                                        @if ($torrent->size)
+                                            <span><i class="fas fa-weight-hanging text-[0.6rem]"></i> {{ $torrent->size }}</span>
+                                        @endif
+                                        @if ($torrent->seeders > 0)
+                                            <span class="text-green-400"><i class="fas fa-arrow-up text-[0.6rem]"></i> {{ $torrent->seeders }}</span>
+                                        @endif
+                                        @if ($torrent->leechers > 0)
+                                            <span><i class="fas fa-arrow-down text-[0.6rem]"></i> {{ $torrent->leechers }}</span>
+                                        @endif
+                                        @if ($torrent->source)
+                                            <span class="rounded bg-ink-700 px-1.5 py-0.5 text-[0.6rem]">{{ $torrent->source }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                                <a href="{{ $torrent->magnet }}"
+                                   class="shrink-0 inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-brand-hover"
+                                   target="_blank" rel="noopener">
+                                    <i class="fas fa-magnet"></i> Baixar
+                                </a>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endforeach
+        @elseif ($magnetLink)
+            {{-- Magnet link legado (único) --}}
             <div class="rounded-2xl border-2 border-brand/30 bg-gradient-to-br from-brand-soft/20 to-ink-900 p-8 text-center">
                 <div class="mx-auto max-w-md">
                     <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-brand/20">
@@ -117,7 +180,7 @@
                 </div>
             </div>
         @elseif (count($torrentResults) > 0)
-            {{-- Lista de resultados da busca --}}
+            {{-- Lista de resultados da busca em tempo real --}}
             <div class="space-y-3">
                 <p class="text-xs text-faint">
                     {{ count($torrentResults) }} resultado(s) encontrado(s)
@@ -174,6 +237,7 @@
             <div class="rounded-xl border border-dashed border-line bg-ink-800 p-6 text-center">
                 <i class="fas fa-circle-exclamation mb-2 block text-xl text-muted opacity-50"></i>
                 <p class="text-sm text-muted">Nenhum torrent encontrado para este filme.</p>
+                <p class="mt-1 text-xs text-faint">Use o console ADM para popular os torrents.</p>
             </div>
         @endif
     </div>

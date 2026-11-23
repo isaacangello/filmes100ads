@@ -92,10 +92,20 @@ Route::prefix('/adm')->middleware('auth')->group(function () {
         Route::get('console/dump-download', [AdmConsoleController::class, 'downloadDump'])
             ->name('adm.console.dump.download');
 
-        // Seed TMDB com progresso em tempo real via AJAX.
+        // Seed TMDB por lotes via AJAX (evita timeout do InfinityFree).
         Route::post('console/seed-tmdb', [AdmConsoleController::class, 'seedTmdb'])
             ->name('adm.console.seed-tmdb');
+        Route::post('console/seed-tmdb/batch', [AdmConsoleController::class, 'seedTmdbBatch'])
+            ->name('adm.console.seed-tmdb.batch');
         Route::get('console/seed-tmdb/progress', [AdmConsoleController::class, 'seedTmdbProgress'])
             ->name('adm.console.seed-tmdb.progress');
+
+        // Populador de torrents por lotes via AJAX.
+        Route::post('console/populate-torrents', [AdmConsoleController::class, 'populateTorrents'])
+            ->name('adm.console.populate-torrents');
+        Route::post('console/populate-torrents/batch', [AdmConsoleController::class, 'populateTorrentsBatch'])
+            ->name('adm.console.populate-torrents.batch');
+        Route::get('console/populate-torrents/progress', [AdmConsoleController::class, 'populateTorrentsProgress'])
+            ->name('adm.console.populate-torrents.progress');
     });
 });

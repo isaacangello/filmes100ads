@@ -12,6 +12,7 @@ class Post extends Model
         'user_id', 'name', 'realname', 'sinopse', 'descricao',
         'diretor', 'duracao', 'ano', 'pais', 'status1', 'status2',
         'magnet_link', 'poster_url', 'vote_average', 'vote_count', 'original_language',
+        'tmdb_id',
     ];
 
     /**
@@ -36,5 +37,13 @@ class Post extends Model
     public function cast()
     {
         return $this->hasMany(MovieCast::class, 'post_id')->orderBy('order');
+    }
+
+    /**
+     * Torrents do filme.
+     */
+    public function torrents()
+    {
+        return $this->hasMany(MovieTorrent::class, 'post_id')->orderBy('seeders', 'desc');
     }
 }

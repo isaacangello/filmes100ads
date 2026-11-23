@@ -121,9 +121,15 @@
                                 </template>
                             @endif
 
-                            @if ($cmd['ajax'] && $key === 'db:seed-tmdb')
+                            @if (($cmd['ajax'] ?? false) && $key === 'db:seed-tmdb')
                                 {{-- Seed TMDB com barra de progresso via AJAX --}}
                                 <div x-data="tmdbSeed()">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <label class="flex items-center gap-1.5 text-xs text-muted cursor-pointer">
+                                            <input type="checkbox" x-model="incremental" class="rounded bg-ink-700 border-ink-600 text-blue-500">
+                                            <span>Incremental</span>
+                                        </label>
+                                    </div>
                                     <button type="button" @click="start()" :disabled="running || done"
                                         class="fda-btn fda-btn-primary text-xs w-full" :class="{'opacity-50 cursor-not-allowed': running || done}">
                                         <template x-if="!running && !done">
@@ -144,6 +150,82 @@
                                             </div>
                                             <div class="w-full bg-ink-600 rounded-full h-2.5 overflow-hidden">
                                                 <div class="bg-gradient-to-r from-blue-500 to-green-500 h-2.5 rounded-full transition-all duration-300"
+                                                     :style="'width: ' + ((created / max) * 100) + '%'" x-ref="bar"></div>
+                                            </div>
+                                            <template x-if="skipped > 0">
+                                                <p class="mt-1 text-xs text-amber-400">Pulados: <span x-text="skipped"></span></p>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            @elseif ($key === 'torrents:populate')
+                                {{-- Popular torrents --}}
+                                <div x-data="torrentPopulate()">
+                                    <button type="button" @click="start()" :disabled="running || done"
+                                        class="fda-btn fda-btn-primary text-xs w-full" :class="{'opacity-50 cursor-not-allowed': running || done}">
+                                        <template x-if="!running && !done">
+                                            <span><i class="fas fa-download text-[0.6rem]"></i> Executar</span>
+                                        </template>
+                                        <template x-if="running">
+                                            <span><i class="fas fa-spinner fa-spin text-[0.6rem]"></i> <span x-text="message"></span></span>
+                                        </template>
+                                        <template x-if="done">
+                                            <span><i class="fas fa-check-circle text-[0.6rem] text-green-400"></i> Concluído</span>
+                                        </template>
+                                    </button>
+                                    <template x-if="running || done">
+                                        <div class="mt-3">
+                                            <div class="flex justify-between text-xs text-muted mb-1">
+                                                <span x-text="processed + ' / ' + total + ' filmes'"></span>
+                                                <span x-text="Math.round((processed / total) * 100) + '%'"></span>
+                                            </div>
+                                            <div class="w-full bg-ink-600 rounded-full h-2.5 overflow-hidden">
+                                                <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-2.5 rounded-full transition-all duration-300"
+                                                     :style="'width: ' + ((processed / total) * 100) + '%'" x-ref="bar"></div>
+                                            </div>
+                                            <p class="mt-1 text-xs text-green-400">Torrents: <span x-text="torrents_saved"></span></p>
+                                        </div>
+                                    </template>
+                                </div>
+                            @elseif ($key === 'torrents:reset')
+                                {{-- Reset torrents --}}
+                                <div x-data="torrentReset()">
+                                    <button type="button" @click="start()" :disabled="running || done"
+                                        class="fda-btn bg-red-600 hover:bg-red-500 border-red-600 text-xs w-full" :class="{'opacity-50 cursor-not-allowed': running || done}">
+                                        <template x-if="!running && !done">
+                                            <span><i class="fas fa-trash text-[0.6rem]"></i> Resetar torrents</span>
+                                        </template>
+                                        <template x-if="running">
+                                            <span><i class="fas fa-spinner fa-spin text-[0.6rem]"></i> <span x-text="message"></span></span>
+                                        </template>
+                                        <template x-if="done">
+                                            <span><i class="fas fa-check-circle text-[0.6rem] text-green-400"></i> Concluído</span>
+                                        </template>
+                                    </button>
+                                </div>
+                            @elseif ($key === 'db:seed-tmdb-reset')
+                                {{-- Reset TMDB --}}
+                                <div x-data="tmdbSeedReset()">
+                                    <button type="button" @click="start()" :disabled="running || done"
+                                        class="fda-btn bg-red-600 hover:bg-red-500 border-red-600 text-xs w-full" :class="{'opacity-50 cursor-not-allowed': running || done}">
+                                        <template x-if="!running && !done">
+                                            <span><i class="fas fa-trash text-[0.6rem]"></i> Resetar tudo</span>
+                                        </template>
+                                        <template x-if="running">
+                                            <span><i class="fas fa-spinner fa-spin text-[0.6rem]"></i> <span x-text="message"></span></span>
+                                        </template>
+                                        <template x-if="done">
+                                            <span><i class="fas fa-check-circle text-[0.6rem] text-green-400"></i> Concluído</span>
+                                        </template>
+                                    </button>
+                                    <template x-if="running || done">
+                                        <div class="mt-3">
+                                            <div class="flex justify-between text-xs text-muted mb-1">
+                                                <span x-text="created + ' / ' + max + ' filmes'"></span>
+                                                <span x-text="Math.round((created / max) * 100) + '%'"></span>
+                                            </div>
+                                            <div class="w-full bg-ink-600 rounded-full h-2.5 overflow-hidden">
+                                                <div class="bg-gradient-to-r from-red-500 to-orange-500 h-2.5 rounded-full transition-all duration-300"
                                                      :style="'width: ' + ((created / max) * 100) + '%'" x-ref="bar"></div>
                                             </div>
                                             <template x-if="skipped > 0">
@@ -173,8 +255,11 @@
 </div>
 
 <script>
-// Componente Alpine.js para o seed TMDB com barra de progresso
+// Componente Alpine.js para o seed TMDB por lotes via AJAX
+// Cada lote processa uma página da TMDB (~20 filmes) e retorna em ~10-15 segundos
+// Isso evita o timeout de 60s do InfinityFree
 document.addEventListener('alpine:init', () => {
+    // Seed incremental — adiciona apenas filmes novos
     Alpine.data('tmdbSeed', () => ({
         running: false,
         done: false,
@@ -182,7 +267,9 @@ document.addEventListener('alpine:init', () => {
         skipped: 0,
         max: 10000,
         message: '',
-        pollInterval: null,
+        incremental: true,
+        batchTimeout: null,
+        csrfToken: '',
 
         start() {
             this.running = true;
@@ -190,40 +277,299 @@ document.addEventListener('alpine:init', () => {
             this.created = 0;
             this.skipped = 0;
             this.message = 'Iniciando...';
+            this.csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ||
+                document.querySelector('input[name="_token"]')?.value || '';
 
-            // Inicia o seed via AJAX
+            this.initSeed();
+        },
+
+        initSeed() {
             fetch('{{ route('adm.console.seed-tmdb') }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ||
-                        document.querySelector('input[name="_token"]')?.value || ''
+                    'X-CSRF-TOKEN': this.csrfToken
                 },
-                body: JSON.stringify({ max: 10000 })
-            }).then(() => {
-                // Inicia polling do progresso
-                this.pollInterval = setInterval(() => this.poll(), 1000);
+                body: JSON.stringify({ max: 10000, incremental: this.incremental })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'error') {
+                    this.message = data.message || 'Erro ao inicializar.';
+                    this.running = false;
+                    this.done = true;
+                    return;
+                }
+                this.max = data.max || 10000;
+                this.message = data.message || 'Inicializado. Processando lotes...';
+                this.processBatch();
+            })
+            .catch(err => {
+                this.message = 'Erro de conexão.';
+                this.running = false;
+                this.done = true;
             });
         },
 
-        poll() {
-            fetch('{{ route('adm.console.seed-tmdb.progress') }}')
-                .then(res => res.json())
-                .then(data => {
-                    this.message = data.message || '';
-                    if (data.created !== undefined) this.created = data.created;
-                    if (data.skipped !== undefined) this.skipped = data.skipped;
-                    if (data.max !== undefined) this.max = data.max;
+        processBatch() {
+            if (!this.running) return;
 
-                    if (data.status === 'done' || data.status === 'error') {
-                        this.running = false;
-                        this.done = true;
-                        if (this.pollInterval) clearInterval(this.pollInterval);
-                    }
-                })
-                .catch(() => {
-                    // Erro de polling — continua tentando
-                });
+            this.message = 'Processando lote... (página carregando)';
+
+            fetch('{{ route('adm.console.seed-tmdb.batch') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': this.csrfToken
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'error') {
+                    this.message = data.message || 'Erro no lote.';
+                    this.running = false;
+                    this.done = true;
+                    return;
+                }
+
+                this.created = data.created || this.created;
+                this.skipped = data.skipped || this.skipped;
+                this.max = data.max || this.max;
+                this.message = data.message || `Lote ${data.page || '?'} processado`;
+
+                if (data.status === 'done') {
+                    this.running = false;
+                    this.done = true;
+                    this.message = data.message;
+                } else {
+                    this.batchTimeout = setTimeout(() => this.processBatch(), 500);
+                }
+            })
+            .catch(err => {
+                this.message = 'Erro de conexão. Retentando...';
+                this.batchTimeout = setTimeout(() => this.processBatch(), 5000);
+            });
+        }
+    }));
+
+    // Reset — apaga tudo e recomeça do zero
+    Alpine.data('tmdbSeedReset', () => ({
+        running: false,
+        done: false,
+        created: 0,
+        skipped: 0,
+        max: 10000,
+        message: '',
+        batchTimeout: null,
+        csrfToken: '',
+
+        start() {
+            this.running = true;
+            this.done = false;
+            this.created = 0;
+            this.skipped = 0;
+            this.message = 'Resetando...';
+            this.csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ||
+                document.querySelector('input[name="_token"]')?.value || '';
+
+            this.initSeed();
+        },
+
+        initSeed() {
+            fetch('{{ route('adm.console.seed-tmdb') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': this.csrfToken
+                },
+                body: JSON.stringify({ max: 10000, incremental: false })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'error') {
+                    this.message = data.message || 'Erro ao inicializar.';
+                    this.running = false;
+                    this.done = true;
+                    return;
+                }
+                this.max = data.max || 10000;
+                this.message = data.message || 'Reset concluído. Processando lotes...';
+                this.processBatch();
+            })
+            .catch(err => {
+                this.message = 'Erro de conexão.';
+                this.running = false;
+                this.done = true;
+            });
+        },
+
+        processBatch() {
+            if (!this.running) return;
+
+            this.message = 'Processando lote...';
+
+            fetch('{{ route('adm.console.seed-tmdb.batch') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': this.csrfToken
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'error') {
+                    this.message = data.message || 'Erro no lote.';
+                    this.running = false;
+                    this.done = true;
+                    return;
+                }
+
+                this.created = data.created || this.created;
+                this.skipped = data.skipped || this.skipped;
+                this.max = data.max || this.max;
+                this.message = data.message || `Lote ${data.page || '?'} processado`;
+
+                if (data.status === 'done') {
+                    this.running = false;
+                    this.done = true;
+                    this.message = data.message;
+                } else {
+                    this.batchTimeout = setTimeout(() => this.processBatch(), 500);
+                }
+            })
+            .catch(err => {
+                this.message = 'Erro de conexão. Retentando...';
+                this.batchTimeout = setTimeout(() => this.processBatch(), 5000);
+            });
+        }
+    }));
+
+    // Populador de torrents — busca torrents para todos os filmes
+    Alpine.data('torrentPopulate', () => ({
+        running: false,
+        done: false,
+        processed: 0,
+        total: 0,
+        torrents_saved: 0,
+        message: '',
+        batchTimeout: null,
+        csrfToken: '',
+
+        start() {
+            this.running = true;
+            this.done = false;
+            this.processed = 0;
+            this.torrents_saved = 0;
+            this.message = 'Iniciando...';
+            this.csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ||
+                document.querySelector('input[name="_token"]')?.value || '';
+
+            this.initPopulate();
+        },
+
+        initPopulate() {
+            fetch('{{ route('adm.console.populate-torrents') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': this.csrfToken
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'error') {
+                    this.message = data.message || 'Erro ao inicializar.';
+                    this.running = false;
+                    this.done = true;
+                    return;
+                }
+                this.total = data.total || 0;
+                this.message = data.message || 'Inicializado. Processando lotes...';
+                this.processBatch();
+            })
+            .catch(err => {
+                this.message = 'Erro de conexão.';
+                this.running = false;
+                this.done = true;
+            });
+        },
+
+        processBatch() {
+            if (!this.running) return;
+
+            this.message = 'Buscando torrents...';
+
+            fetch('{{ route('adm.console.populate-torrents.batch') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': this.csrfToken
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'error') {
+                    this.message = data.message || 'Erro no lote.';
+                    this.running = false;
+                    this.done = true;
+                    return;
+                }
+
+                this.processed = data.processed || this.processed;
+                this.total = data.total || this.total;
+                this.torrents_saved = data.torrents_saved || this.torrents_saved;
+                this.message = data.message || 'Processando...';
+
+                if (data.status === 'done') {
+                    this.running = false;
+                    this.done = true;
+                    this.message = data.message;
+                } else {
+                    this.batchTimeout = setTimeout(() => this.processBatch(), 500);
+                }
+            })
+            .catch(err => {
+                this.message = 'Erro de conexão. Retentando...';
+                this.batchTimeout = setTimeout(() => this.processBatch(), 5000);
+            });
+        }
+    }));
+
+    // Reset de torrents — apaga todos os torrents salvos
+    Alpine.data('torrentReset', () => ({
+        running: false,
+        done: false,
+        message: '',
+        csrfToken: '',
+
+        start() {
+            if (!confirm('Tem certeza que deseja apagar todos os torrents salvos?')) return;
+
+            this.running = true;
+            this.done = false;
+            this.message = 'Apagando torrents...';
+            this.csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ||
+                document.querySelector('input[name="_token"]')?.value || '';
+
+            fetch('{{ route('adm.console.execute') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': this.csrfToken
+                },
+                body: JSON.stringify({ command: 'torrents:reset' })
+            })
+            .then(res => res.json())
+            .then(data => {
+                this.message = data.message || 'Torrents apagados.';
+                this.running = false;
+                this.done = true;
+            })
+            .catch(err => {
+                this.message = 'Erro ao resetar.';
+                this.running = false;
+                this.done = true;
+            });
         }
     }));
 });

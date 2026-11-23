@@ -108,7 +108,7 @@ class MovieDetail extends Component
 
     public function render()
     {
-        $filme = Post::with('cast')->find($this->filmeid);
+        $filme = Post::with(['cast', 'torrents'])->find($this->filmeid);
 
         abort_if(! $filme, 404, 'Filme não encontrado.');
 
@@ -118,9 +118,15 @@ class MovieDetail extends Component
             ->where('categorias_posts.post_id', $this->filmeid)
             ->value('categorias.name');
 
+        // Agrupar torrents por qualidade
+        $torrentsByQuality = $filme->torrents->groupBy('quality')->map(function ($group) {
+            return $group->sortByDesc('seeders')->values();
+        });
+
         return view('livewire.movie-detail', [
             'filme' => $filme,
             'categoria' => $categoria,
+            'torrentsByQuality' => $torrentsByQuality,
         ]);
     }
 }
