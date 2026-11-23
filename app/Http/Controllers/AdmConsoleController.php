@@ -154,10 +154,9 @@ class AdmConsoleController extends Controller
         $command = $commandConfig['command'];
         $params = $commandConfig['params'];
 
-        // Executa o comando
-        Artisan::call($command, $params);
+        // Executa o comando — no Laravel 11, call() retorna o exit code diretamente
+        $exitCode = Artisan::call($command, $params);
         $output = Artisan::output();
-        $exitCode = Artisan::exitCode();
 
         return redirect()->route('adm.console')
             ->with('console_output', trim($output))
