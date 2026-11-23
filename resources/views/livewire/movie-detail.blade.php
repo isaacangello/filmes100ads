@@ -321,6 +321,7 @@ function torrentDelay(magnet, delaySeconds) {
         counting: false,
         done: false,
         interval: null,
+        magnet: magnet,
 
         start() {
             if (this.counting || this.done) return;
@@ -333,13 +334,13 @@ function torrentDelay(magnet, delaySeconds) {
                     clearInterval(this.interval);
                     this.counting = false;
                     this.done = true;
-                    // Abrir o magnet link após o delay
-                    window.open(magnet, '_blank');
-                    // Resetar após 2 segundos
+                    // Abrir o magnet link após o delay usando location.href (não bloqueado como popup)
+                    window.location.href = this.magnet;
+                    // Resetar após 3 segundos
                     setTimeout(() => {
                         this.done = false;
                         this.seconds = delaySeconds;
-                    }, 2000);
+                    }, 3000);
                 }
             }, 1000);
         }
