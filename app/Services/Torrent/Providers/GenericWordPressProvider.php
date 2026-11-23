@@ -18,7 +18,7 @@ class GenericWordPressProvider implements TorrentProviderInterface
     protected string $baseUrl;
     protected int $timeout;
 
-    public function __construct(string $baseUrl, int $timeout = 10)
+    public function __construct(string $baseUrl, int $timeout = 5)
     {
         // Normalizar URL: remover trailing slash e paths
         $parsed = parse_url($baseUrl);
@@ -139,6 +139,7 @@ class GenericWordPressProvider implements TorrentProviderInterface
             }
 
             // Estratégia 4: Se ainda não encontrou nada, tentar buscar na página de cada resultado
+            // Limitado a 2 posts para não causar timeout no InfinityFree
             if (empty($results)) {
                 // Extrair URLs de posts da página de busca
                 $postUrls = [];
@@ -151,8 +152,8 @@ class GenericWordPressProvider implements TorrentProviderInterface
                     }
                 }
 
-                // Tentar buscar em cada URL (limitado a 5 para não demorar)
-                $postUrls = array_slice($postUrls, 0, 5);
+                // Tentar buscar em cada URL (limitado a 2 para não causar timeout)
+                $postUrls = array_slice($postUrls, 0, 2);
                 foreach ($postUrls as $url) {
                     $subResults = $this->scrapePostPage($url, $query);
                     $results = array_merge($results, $subResults);

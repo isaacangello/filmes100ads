@@ -467,12 +467,15 @@ document.addEventListener('alpine:init', () => {
         customUrl: '',
         batchTimeout: null,
         csrfToken: '',
+        retryCount: 0,
+        maxRetries: 5,
 
         start() {
             this.running = true;
             this.done = false;
             this.processed = 0;
             this.torrents_saved = 0;
+            this.retryCount = 0;
             this.message = 'Iniciando...';
             this.csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ||
                 document.querySelector('input[name="_token"]')?.value || '';
@@ -543,8 +546,15 @@ document.addEventListener('alpine:init', () => {
                 }
             })
             .catch(err => {
-                this.message = 'Erro de conexão. Retentando...';
-                this.batchTimeout = setTimeout(() => this.processBatch(), 5000);
+                this.retryCount++;
+                if (this.retryCount >= this.maxRetries) {
+                    this.message = `Erro de conexão após ${this.maxRetries} tentativas. O site de torrent customizado pode estar indisponível. Os providers padrão continuam funcionando.`;
+                    this.running = false;
+                    this.done = true;
+                } else {
+                    this.message = `Erro de conexão (${this.retryCount}/${this.maxRetries}). Retentando...`;
+                    this.batchTimeout = setTimeout(() => this.processBatch(), 10000);
+                }
             });
         }
     }));
