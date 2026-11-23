@@ -39,6 +39,7 @@ jobs:
         env:
           DOTENV: ${{ secrets.DOTENV }}
         run: |
+          sudo apt-get install -y lftp
           printf '%s\n' "$DOTENV" > /tmp/env_tmp
           lftp -c "
             set ftp:ssl-allow no;
