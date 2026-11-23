@@ -8,6 +8,7 @@ use App\Models\MovieTorrent;
 use App\Models\Post;
 use App\Models\User;
 use App\Services\TmdbService;
+use App\Services\Torrent\Providers\GenericWordPressProvider;
 use App\Services\Torrent\TorrentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -502,12 +503,20 @@ class AdmConsoleController extends Controller
 
     /**
      * Inicia o populador de torrents por lotes via AJAX.
+     *
+     * Aceita um campo `customUrl` opcional para adicionar um site de torrents customizado.
      */
     public function populateTorrents(Request $request): JsonResponse
     {
         $totalPosts = Post::where('status1', 'ativado')->count();
         if ($totalPosts === 0) {
             return response()->json(['status' => 'error', 'message' => 'Nenhum filme encontrado.'], 400);
+        }
+
+        // Validar URL customizada, se fornecida
+        $customUrl = trim($request->input('customUrl', ''));
+        if ($customUrl !== '' && !filter_var($customUrl, FILTER_VALIDATE_URL)) {
+            return response()->json(['status' => 'error', 'message' => 'URL inválida.'], 400);
         }
 
         $progressFile = storage_path('app/torrent_populate_progress.json');
@@ -518,6 +527,7 @@ class AdmConsoleController extends Controller
             'total' => $totalPosts,
             'torrents_saved' => 0,
             'current_page' => 1,
+            'custom_url' => $customUrl,
         ], JSON_UNESCAPED_UNICODE));
 
         return response()->json([
@@ -547,6 +557,7 @@ class AdmConsoleController extends Controller
         $processed = $state['processed'] ?? 0;
         $torrentsSaved = $state['torrents_saved'] ?? 0;
         $total = $state['total'] ?? 0;
+        $customUrl = $state['custom_url'] ?? '';
 
         $posts = Post::where('status1', 'ativado')
             ->orderBy('id')
@@ -573,6 +584,12 @@ class AdmConsoleController extends Controller
         }
 
         $service = TorrentService::createFromConfig();
+
+        // Adicionar provider customizado se URL fornecida
+        if ($customUrl !== '') {
+            $customProvider = new GenericWordPressProvider($customUrl);
+            $service->addProvider($customProvider);
+        }
 
         foreach ($posts as $post) {
             $searchTerm = $post->realname ?? $post->name;

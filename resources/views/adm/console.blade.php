@@ -161,6 +161,18 @@
                             @elseif ($key === 'torrents:populate')
                                 {{-- Popular torrents --}}
                                 <div x-data="torrentPopulate()">
+                                    <div class="mb-3">
+                                        <label class="text-xs text-muted mb-1 block">
+                                            <i class="fas fa-globe text-[0.6rem]"></i>
+                                            Site de torrents (opcional)
+                                        </label>
+                                        <input type="url" x-model="customUrl" placeholder="https://www.baixetorrent.org"
+                                            class="w-full rounded-lg border border-ink-600 bg-ink-700 px-3 py-2 text-xs text-white placeholder:text-muted focus:border-blue-500 focus:outline-none"
+                                            :disabled="running || done">
+                                        <p class="mt-1 text-[0.6rem] text-muted">
+                                            Digite o endereço de um site de torrents para buscar links adicionais.
+                                        </p>
+                                    </div>
                                     <button type="button" @click="start()" :disabled="running || done"
                                         class="fda-btn fda-btn-primary text-xs w-full" :class="{'opacity-50 cursor-not-allowed': running || done}">
                                         <template x-if="!running && !done">
@@ -452,6 +464,7 @@ document.addEventListener('alpine:init', () => {
         total: 0,
         torrents_saved: 0,
         message: '',
+        customUrl: '',
         batchTimeout: null,
         csrfToken: '',
 
@@ -473,7 +486,8 @@ document.addEventListener('alpine:init', () => {
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': this.csrfToken
-                }
+                },
+                body: JSON.stringify({ customUrl: this.customUrl })
             })
             .then(res => res.json())
             .then(data => {

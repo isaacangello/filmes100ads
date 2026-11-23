@@ -92,6 +92,15 @@ class TorrentService
     }
 
     /**
+     * Adiciona um provider dinamicamente.
+     * Útil para providers customizados criados pelo usuário (ex: URL digitada no console ADM).
+     */
+    public function addProvider(TorrentProviderInterface $provider): void
+    {
+        $this->providers[] = $provider;
+    }
+
+    /**
      * Retorna a lista de nomes dos providers disponíveis.
      *
      * @return string[]
