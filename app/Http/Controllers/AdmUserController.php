@@ -60,16 +60,32 @@ class AdmUserController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'password' => ['nullable', 'string', 'min:6', 'confirmed'],
             'is_admin' => ['boolean'],
         ]);
 
-        $user->update([
+        $updateData = [
             'name' => $validated['name'],
             'email' => $validated['email'],
             'is_admin' => $request->has('is_admin'),
-        ]);
+        ];
+
+        // Atualiza a senha apenas se foi fornecida
+        if (!empty($validated['password'])) {
+            $updateData['password'] = bcrypt($validated['password']);
+        }
+
+        $user->update($updateData);
 
         return redirect()->route('adm.users.index')->with('success', 'Usuário atualizado com sucesso.');
+    }
+
+    /**
+     * Exibe o formulário de edição de um usuário.
+     */
+    public function edit(User $user): View
+    {
+        return view('adm.users.edit', ['user' => $user]);
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Categoria;
+use App\Services\MinerStatusService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -11,7 +12,7 @@ class AdmController extends Controller
     /**
      * Painel administrativo com os indicadores do sistema.
      */
-    public function index(Request $request)
+    public function index(Request $request, MinerStatusService $minerStatus)
     {
         $userId = $request->user()->id;
 
@@ -35,6 +36,8 @@ class AdmController extends Controller
             ->limit(6)
             ->get();
 
+        $minerStatusData = $minerStatus->getStatus();
+
         return view('adm.index', [
             'stats' => [
                 'totalFilmes' => $totalFilmes,
@@ -44,6 +47,10 @@ class AdmController extends Controller
             ],
             'ultimosFilmes' => $ultimosFilmes,
             'filmesPorCategoria' => $filmesPorCategoria,
+            'minerStatus' => $minerStatusData,
+            'minerStatusLabel' => $minerStatus->getStatusLabel($minerStatusData),
+            'minerStatusBadge' => $minerStatus->getStatusBadgeClass($minerStatusData),
+            'minerStatusIcon' => $minerStatus->getStatusIcon($minerStatusData),
         ]);
     }
 }

@@ -38,6 +38,118 @@
         @endforeach
     </div>
 
+    {{-- ======================= STATUS DO MINERADOR (apenas admins) ======================= --}}
+    @if (auth()->user()->isAdmin())
+    <div class="rounded-2xl border border-line bg-gradient-to-br from-ink-800 to-ink-700 p-5">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center gap-4">
+                <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-ink-700 text-muted">
+                    <i class="fas {{ $minerStatusIcon }}"></i>
+                </span>
+                <div>
+                    <p class="text-xs tracking-[0.09em] text-muted uppercase">Minerador CoinImp</p>
+                    <div class="mt-1 flex items-center gap-2">
+                        <span class="inline-block rounded-full px-2.5 py-0.5 text-xs font-medium {{ $minerStatusBadge }}">
+                            {{ $minerStatusLabel }}
+                        </span>
+                        @if ($minerStatus['last_checked'])
+                        <span class="text-[0.65rem] text-faint">
+                            Última verificação: {{ \Illuminate\Support\Carbon::parse($minerStatus['last_checked'])->format('H:i:s') }}
+                        </span>
+                        @endif
+                    </div>
+                    @if (!$minerStatus['enabled'])
+                    <p class="mt-1 text-xs text-muted">
+                        O minerador está desativado em <code class="rounded bg-ink-700 px-1.5 py-0.5 text-[0.65rem]">config/miner.php</code>.
+                        Configure <code class="rounded bg-ink-700 px-1.5 py-0.5 text-[0.65rem]">MINER_ENABLED</code> e <code class="rounded bg-ink-700 px-1.5 py-0.5 text-[0.65rem]">MINER_SITE_KEY</code> no .env para ativar.
+                    </p>
+                    @elseif (!$minerStatus['has_site_key'])
+                    <p class="mt-1 text-xs text-muted">
+                        Minerador ativado, mas a chave do site não está configurada. Defina <code class="rounded bg-ink-700 px-1.5 py-0.5 text-[0.65rem]">MINER_SITE_KEY</code> no .env.
+                    </p>
+                    @elseif (isset($minerStatus['scripts_present']) && !$minerStatus['scripts_present']['all_present'] && !$minerStatus['scripts_present']['uses_cdn'])
+                    <p class="mt-1 text-xs text-red-400">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        Scripts do minerador ausentes em <code class="rounded bg-ink-700 px-1.5 py-0.5 text-[0.65rem]">public/miner/</code>.
+                        Faltando: {{ implode(', ', $minerStatus['scripts_present']['missing']) }}.
+                    </p>
+                    <p class="mt-0.5 text-xs text-muted">
+                        Baixe os scripts <code class="rounded bg-ink-700 px-1.5 py-0.5 text-[0.65rem]">jiB0.php</code> e <code class="rounded bg-ink-700 px-1.5 py-0.5 text-[0.65rem]">RqH3.js</code> no painel do CoinImp e coloque em <code class="rounded bg-ink-700 px-1.5 py-0.5 text-[0.65rem]">public/miner/</code>.
+                        Veja <code class="rounded bg-ink-700 px-1.5 py-0.5 text-[0.65rem]">public/miner/README.md</code> para instruções.
+                    </p>
+                    <p class="mt-0.5 text-xs text-blue-400">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Ou use o CDN do CoinImp: defina <code class="rounded bg-ink-700 px-1.5 py-0.5 text-[0.65rem]">MINER_SCRIPT_PATH=https://www.hostingcloud.racing/RqH3.js</code> no .env.
+                    </p>
+                    @elseif (!$minerStatus['has_api_keys'])
+                    <p class="mt-1 text-xs text-blue-400">
+                        <i class="fas fa-plug mr-1"></i>
+                        Minerador ativado, mas sem chaves de API. Defina <code class="rounded bg-ink-700 px-1.5 py-0.5 text-[0.65rem]">MINER_API_PUBLIC</code> e <code class="rounded bg-ink-700 px-1.5 py-0.5 text-[0.65rem]">MINER_API_PRIVATE</code> no .env.
+                    </p>
+                    <p class="mt-0.5 text-xs text-muted">
+                        Gere as chaves em <code class="rounded bg-ink-700 px-1.5 py-0.5 text-[0.65rem]">https://www.coinimp.com/dashboard</code> (seção API).
+                    </p>
+                    <p class="mt-1 text-xs">
+                        <a href="{{ route('adm.minerador') }}" class="text-brand hover:underline">
+                            <i class="fas fa-chart-line mr-1"></i>Ver dashboard completo
+                        </a>
+                    </p>
+                    @elseif (!$minerStatus['api_reachable'])
+                    <p class="mt-1 text-xs text-muted">
+                        Minerador ativado, mas a API do CoinImp não respondeu. O serviço pode estar indisponível.
+                        @if ($minerStatus['api_error'])
+                        <code class="rounded bg-ink-700 px-1.5 py-0.5 text-[0.65rem]">{{ $minerStatus['api_error'] }}</code>
+                        @endif
+                    </p>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Dados da API oficial --}}
+            @if ($minerStatus['api_reachable'] && $minerStatus['api_response'])
+            <div class="hidden sm:block text-right">
+                @php
+                    $apiResponse = $minerStatus['api_response'];
+                    // Hashes totais — a API retorna {"message":{"result":"13292518"},"status":"success"}
+                    $totalHashes = 0;
+                    $hashesMsg = $apiResponse['hashes']['message'] ?? null;
+                    if (is_array($hashesMsg) && isset($hashesMsg['result'])) {
+                        $totalHashes = (float) $hashesMsg['result'];
+                    } elseif (is_numeric($hashesMsg)) {
+                        $totalHashes = (float) $hashesMsg;
+                    }
+                    // Reward (saldo) — mesma estrutura message.result
+                    $reward = null;
+                    $rewardMsg = $apiResponse['reward']['message'] ?? null;
+                    if (is_array($rewardMsg) && isset($rewardMsg['result'])) {
+                        $reward = (float) $rewardMsg['result'];
+                    } elseif (is_numeric($rewardMsg)) {
+                        $reward = (float) $rewardMsg;
+                    }
+                    // Miners online
+                    $minersOnline = isset($apiResponse['site_info']['miners']) ? $apiResponse['site_info']['miners'] : null;
+                @endphp
+
+                @if ($totalHashes > 0)
+                <p class="text-xs text-muted">Hashes mineradas</p>
+                <p class="text-lg font-semibold">{{ number_format($totalHashes, 0, ',', '.') }}</p>
+                @endif
+
+                @if ($reward !== null)
+                <p class="text-xs text-muted">Saldo (MINT)</p>
+                <p class="text-sm font-medium">{{ number_format($reward, 8) }}</p>
+                @endif
+
+                @if ($minersOnline !== null)
+                <p class="text-xs text-muted">Miners online</p>
+                <p class="text-sm font-medium">{{ $minersOnline }}</p>
+                @endif
+            </div>
+            @endif
+        </div>
+    </div>
+    @endif
+
     <div class="grid gap-6 lg:grid-cols-3">
 
         {{-- ======================= ÚLTIMOS FILMES ======================= --}}

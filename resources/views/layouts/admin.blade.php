@@ -109,6 +109,14 @@
                         @endif
                         <i class="fas fa-terminal w-4 text-xs"></i> Console
                     </a>
+
+                    <a href="{{ route('adm.minerador') }}"
+                        class="group relative flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium transition {{ request()->routeIs('adm.minerador') ? 'bg-brand-soft text-white' : 'text-muted hover:bg-ink-800 hover:text-white' }}">
+                        @if (request()->routeIs('adm.minerador'))
+                            <span class="absolute inset-y-2 left-0 w-0.5 rounded-full bg-brand"></span>
+                        @endif
+                        <i class="fas fa-microchip w-4 text-xs"></i> Minerador
+                    </a>
                 </div>
             </div>
             @endif

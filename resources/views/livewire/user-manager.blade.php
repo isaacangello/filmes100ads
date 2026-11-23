@@ -73,6 +73,11 @@
                                 </td>
                                 <td>
                                     <div class="flex items-center justify-end gap-2">
+                                        <a href="{{ route('adm.users.edit', $usuario->id) }}"
+                                           class="rounded-lg border border-line px-3 py-1.5 text-xs font-medium text-muted transition hover:bg-ink-700 hover:text-white">
+                                            <i class="fas fa-pen text-[0.6rem]"></i>
+                                            Editar
+                                        </a>
                                         <button type="button"
                                                 wire:click="toggleAdmin({{ $usuario->id }})"
                                                 wire:confirm="Tem certeza que deseja {{ $usuario->is_admin ? 'remover' : 'adicionar' }} o status de admin de '{{ $usuario->name }}'?"

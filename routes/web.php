@@ -81,6 +81,7 @@ Route::prefix('/adm')->middleware('auth')->group(function () {
         Route::get('usuarios', [AdmUserController::class, 'index'])->name('adm.users.index');
         Route::get('usuarios/criar', [AdmUserController::class, 'create'])->name('adm.users.create');
         Route::post('usuarios', [AdmUserController::class, 'store'])->name('adm.users.store');
+        Route::get('usuarios/{user}/editar', [AdmUserController::class, 'edit'])->name('adm.users.edit');
         Route::put('usuarios/{user}', [AdmUserController::class, 'update'])->name('adm.users.update');
         Route::delete('usuarios/{user}', [AdmUserController::class, 'destroy'])->name('adm.users.destroy');
 
@@ -107,5 +108,10 @@ Route::prefix('/adm')->middleware('auth')->group(function () {
             ->name('adm.console.populate-torrents.batch');
         Route::get('console/populate-torrents/progress', [AdmConsoleController::class, 'populateTorrentsProgress'])
             ->name('adm.console.populate-torrents.progress');
+
+        // Dashboard do minerador CoinImp.
+        Route::get('minerador', function () {
+            return view('adm.minerador');
+        })->name('adm.minerador');
     });
 });
