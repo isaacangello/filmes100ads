@@ -153,11 +153,22 @@
                                         @endif
                                     </div>
                                 </div>
-                                <a href="{{ $torrent->magnet }}"
-                                   class="shrink-0 inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:bg-brand-hover"
-                                   target="_blank" rel="noopener">
-                                    <i class="fas fa-magnet"></i> Baixar
-                                </a>
+                                <div x-data="torrentDelay('{{ $torrent->magnet }}', 10)" class="shrink-0">
+                                    <button type="button" @click="start()" :disabled="counting || done"
+                                        class="inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-bold text-white transition-all"
+                                        :class="counting ? 'bg-brand/50 cursor-wait' : 'bg-brand hover:-translate-y-0.5 hover:bg-brand-hover'"
+                                        :style="counting ? 'opacity:0.8' : ''">
+                                        <template x-if="!counting && !done">
+                                            <span><i class="fas fa-magnet"></i> Baixar</span>
+                                        </template>
+                                        <template x-if="counting">
+                                            <span><i class="fas fa-hourglass-half fa-spin"></i> <span x-text="seconds"></span>s</span>
+                                        </template>
+                                        <template x-if="done">
+                                            <span><i class="fas fa-check"></i> Pronto!</span>
+                                        </template>
+                                    </button>
+                                </div>
                             </div>
                         @endforeach
                     </div>
@@ -172,11 +183,22 @@
                     </div>
                     <h2 class="text-2xl font-bold">Download do Filme</h2>
                     <p class="mt-2 text-sm text-muted">Clique no botão abaixo para abrir o link magnet no seu cliente de torrent.</p>
-                    <a href="{{ $magnetLink }}"
-                       class="mt-6 inline-flex items-center gap-3 rounded-xl bg-brand px-8 py-4 text-lg font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-brand-hover hover:shadow-xl"
-                       target="_blank" rel="noopener">
-                        <i class="fas fa-magnet text-xl"></i> Baixar via Torrent
-                    </a>
+                    <div x-data="torrentDelay('{{ $magnetLink }}', 10)">
+                        <button type="button" @click="start()" :disabled="counting || done"
+                            class="mt-6 inline-flex items-center gap-3 rounded-xl px-8 py-4 text-lg font-bold text-white shadow-lg transition-all"
+                            :class="counting ? 'bg-brand/50 cursor-wait' : 'bg-brand hover:-translate-y-0.5 hover:bg-brand-hover hover:shadow-xl'"
+                            :style="counting ? 'opacity:0.8' : ''">
+                            <template x-if="!counting && !done">
+                                <span><i class="fas fa-magnet text-xl"></i> Baixar via Torrent</span>
+                            </template>
+                            <template x-if="counting">
+                                <span><i class="fas fa-hourglass-half fa-spin text-xl"></i> Aguarde <span x-text="seconds"></span>s</span>
+                            </template>
+                            <template x-if="done">
+                                <span><i class="fas fa-check text-xl"></i> Download liberado!</span>
+                            </template>
+                        </button>
+                    </div>
                 </div>
             </div>
         @elseif (count($torrentResults) > 0)
@@ -220,12 +242,25 @@
                             </div>
                             <div class="flex shrink-0 items-center gap-2">
                                 @if ($resultado['magnet'] !== '')
-                                    <a href="{{ $resultado['magnet'] }}"
-                                       class="fda-btn fda-btn-primary"
-                                       title="Abrir link magnet"
-                                       target="_blank" rel="noopener">
-                                        <i class="fas fa-magnet text-xs"></i>
-                                    </a>
+                                    @php
+                                        $magnetValue = $resultado['magnet'];
+                                    @endphp
+                                    <div x-data="torrentDelay('{{ $magnetValue }}', 10)">
+                                        <button type="button" @click="start()" :disabled="counting || done"
+                                            class="fda-btn fda-btn-primary"
+                                            :class="counting ? 'opacity-50 cursor-wait' : ''"
+                                            title="Abrir link magnet">
+                                            <template x-if="!counting && !done">
+                                                <span><i class="fas fa-magnet text-xs"></i></span>
+                                            </template>
+                                            <template x-if="counting">
+                                                <span><i class="fas fa-hourglass-half fa-spin text-xs"></i> <span x-text="seconds"></span>s</span>
+                                            </template>
+                                            <template x-if="done">
+                                                <span><i class="fas fa-check text-xs"></i></span>
+                                            </template>
+                                        </button>
+                                    </div>
                                 @endif
                             </div>
                         </div>
@@ -242,4 +277,72 @@
         @endif
     </div>
 
+    {{-- ======================= ÚLTIMOS ADICIONADOS ======================= --}}
+    @if ($ultimosAdicionados->isNotEmpty())
+        <div class="mt-8 border-t border-line pt-8">
+            <h2 class="mb-5 text-xl font-bold flex items-center gap-2">
+                <i class="fas fa-clock text-brand"></i> Últimos adicionados em {{ date('Y') }}
+            </h2>
+            <div class="grid grid-cols-2 gap-x-3.5 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+                @foreach ($ultimosAdicionados as $post)
+                    <a href="{{ route('index', ['filmeid' => $post->id]) }}" title="{{ $post->name }}"
+                        class="group block transition hover:-translate-y-1">
+                        <div class="relative aspect-[2/3] overflow-hidden rounded-xl border border-line bg-ink-700 shadow-card transition group-hover:border-line-strong group-hover:shadow-card-hover">
+                            @if ($post->poster_url)
+                                <img src="{{ $post->poster_url }}" alt="{{ $post->name }}"
+                                    loading="lazy"
+                                    class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
+                            @elseif (file_exists(public_path('storage/capas/image'.$post->id.'.jpg')))
+                                <img src="{{ url('storage/capas/image'.$post->id.'.jpg') }}" alt="{{ $post->name }}"
+                                    loading="lazy"
+                                    class="h-full w-full object-cover transition duration-300 group-hover:scale-105">
+                            @else
+                                <div class="flex h-full w-full items-center justify-center bg-ink-600 text-muted">
+                                    <i class="fas fa-film text-3xl opacity-30"></i>
+                                </div>
+                            @endif
+                        </div>
+                        <div class="px-0.5 pt-2.5">
+                            <h3 class="line-clamp-2 text-sm leading-snug font-semibold">{{ $post->name }}</h3>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
 </div>
+
+{{-- Script do delay de torrent com mineração --}}
+<script>
+function torrentDelay(magnet, delaySeconds) {
+    return {
+        seconds: delaySeconds,
+        counting: false,
+        done: false,
+        interval: null,
+
+        start() {
+            if (this.counting || this.done) return;
+            this.counting = true;
+            this.seconds = delaySeconds;
+
+            this.interval = setInterval(() => {
+                this.seconds--;
+                if (this.seconds <= 0) {
+                    clearInterval(this.interval);
+                    this.counting = false;
+                    this.done = true;
+                    // Abrir o magnet link após o delay
+                    window.open(magnet, '_blank');
+                    // Resetar após 2 segundos
+                    setTimeout(() => {
+                        this.done = false;
+                        this.seconds = delaySeconds;
+                    }, 2000);
+                }
+            }, 1000);
+        }
+    };
+}
+</script>

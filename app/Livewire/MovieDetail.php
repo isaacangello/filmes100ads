@@ -123,10 +123,20 @@ class MovieDetail extends Component
             return $group->sortByDesc('seeders')->values();
         });
 
+        // Últimos 10 filmes adicionados do ano corrente
+        $anoCorrente = (int) date('Y');
+        $ultimosAdicionados = Post::where('ano', $anoCorrente)
+            ->where('status1', 'ativado')
+            ->where('id', '!=', $this->filmeid)
+            ->orderByDesc('id')
+            ->limit(10)
+            ->get(['id', 'name', 'poster_url', 'ano']);
+
         return view('livewire.movie-detail', [
             'filme' => $filme,
             'categoria' => $categoria,
             'torrentsByQuality' => $torrentsByQuality,
+            'ultimosAdicionados' => $ultimosAdicionados,
         ]);
     }
 }

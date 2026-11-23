@@ -13,3 +13,6 @@ npm-debug.log
 yarn-error.log
 wallet-mintme
 .env.production
+vendor.zip
+vendor_part_*
+public/setup-tmdb.php

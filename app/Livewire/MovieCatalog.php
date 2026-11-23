@@ -27,6 +27,10 @@ class MovieCatalog extends Component
     #[Url(as: 'busca', except: '')]
     public $busca = '';
 
+    /** Filtro por ano (?ano=2025). */
+    #[Url(as: 'ano', except: '')]
+    public $ano = '';
+
     public function paginationView()
     {
         return 'pagination::fda';
@@ -42,12 +46,17 @@ class MovieCatalog extends Component
         $this->resetPage();
     }
 
+    public function updatedAno()
+    {
+        $this->resetPage();
+    }
+
     /**
      * Limpa todos os filtros aplicados.
      */
     public function limparFiltros()
     {
-        $this->reset('categoriaId', 'busca');
+        $this->reset('categoriaId', 'busca', 'ano');
         $this->resetPage();
     }
 
@@ -59,6 +68,10 @@ class MovieCatalog extends Component
             ? $categorias->firstWhere('id', (int) $this->categoriaId)
             : null;
 
+        // Anos disponíveis nos últimos 3 anos (ano corrente, -1, -2)
+        $anoCorrente = (int) date('Y');
+        $anosDisponiveis = range($anoCorrente, $anoCorrente - 2);
+
         $query = Post::query()
             ->with('categorias:id,name')
             ->select('id', 'name', 'sinopse', 'ano', 'duracao', 'poster_url');
@@ -67,6 +80,10 @@ class MovieCatalog extends Component
             $query->whereIn('id', DB::table('categorias_posts')
                 ->select('post_id')
                 ->where('categoria_id', (int) $this->categoriaId));
+        }
+
+        if ($this->ano !== '') {
+            $query->where('ano', (int) $this->ano);
         }
 
         $termo = trim((string) $this->busca);
@@ -86,6 +103,7 @@ class MovieCatalog extends Component
             'posts' => $posts,
             'categorias' => $categorias,
             'categoria' => $categoria,
+            'anosDisponiveis' => $anosDisponiveis,
             'total' => $posts->total(),
         ]);
     }

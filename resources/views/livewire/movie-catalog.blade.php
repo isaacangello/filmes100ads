@@ -52,6 +52,22 @@
         @endforeach
     </div>
 
+    {{-- ======================= CHIPS DE ANO ======================= --}}
+    <div class="fda-scroll-x -mx-4 mt-3 flex gap-2 px-4 pb-2 sm:mx-0 sm:flex-wrap sm:px-0">
+        <span class="text-xs text-muted self-center mr-1"><i class="fas fa-calendar text-[0.6rem]"></i> Ano:</span>
+        <button type="button" wire:click="$set('ano', '')"
+            class="fda-chip {{ $ano === '' ? 'fda-chip-active' : '' }}">
+            Todos
+        </button>
+
+        @foreach ($anosDisponiveis as $anoItem)
+            <button type="button" wire:click="$set('ano', '{{ $anoItem }}')"
+                class="fda-chip {{ (string) $ano === (string) $anoItem ? 'fda-chip-active' : '' }}">
+                {{ $anoItem }}
+            </button>
+        @endforeach
+    </div>
+
     {{-- ======================= GRADE DE FILMES ======================= --}}
     @if ($posts->count())
         <div class="mt-8 grid grid-cols-2 gap-x-3.5 gap-y-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7">
