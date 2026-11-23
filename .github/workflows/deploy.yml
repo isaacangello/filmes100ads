@@ -3,6 +3,7 @@ name: Deploy to InfinityFree
 on:
   push:
     tags: ['v*']
+    branches: [newlaravel]
   workflow_dispatch:
 
 jobs:
@@ -25,19 +26,33 @@ jobs:
         env:
           NODE_ENV: production
 
-      - name: Deploy via FTP
+      - name: Install PHP dependencies
+        run: |
+          sudo apt-get install -y lftp php-cli composer
+          composer install --no-dev --optimize-autoloader
+
+      - name: Deploy via FTP (full with vendor)
         env:
           DOTENV: ${{ secrets.DOTENV }}
         run: |
-          sudo apt-get install -y lftp
           printf '%s\n' "$DOTENV" > /tmp/env_tmp
           lftp -c "
             set ftp:ssl-allow no;
             set ftp:chmod-default '';
             open ftp://${{ secrets.FTP_USER }}:${{ secrets.FTP_PASS }}@${{ secrets.FTP_HOST }};
-            mirror --reverse --delete --verbose --no-perms public/ /htdocs/;
-            cd /htdocs
-            put /tmp/env_tmp -o .env;
-            ls -la .env;
+            cd /htdocs;
+            # Upload Laravel root files
+            mirror --reverse --no-perms --exclude-glob='vendor/*' --exclude-glob='node_modules/*' --exclude-glob='.git/*' --exclude-glob='storage/logs/*' --exclude-glob='storage/framework/cache/*' --exclude-glob='storage/framework/sessions/*' --exclude-glob='storage/framework/views/*' --exclude-glob='storage/framework/testing/*' --exclude-glob='public/*' --exclude-glob='wallet-mintme/*' . /htdocs/;
+            # Upload public/ to htdocs/public/
+            mirror --reverse --no-perms public/ /htdocs/public/;
+            # Upload vendor/ to htdocs/vendor/
+            mirror --reverse --no-perms vendor/ /htdocs/vendor/;
+            # Upload .env
+            put /tmp/env_tmp -o /htdocs/.env;
             quit
           "
+
+      - name: Clear caches via browser
+        run: |
+          # Use the server-reset.php to clear caches
+          curl -s "http://filmes100ads.free.nf/server-reset.php?key=${{ secrets.DEPLOY_KEY }}&action=reset" --max-time 30 || true
