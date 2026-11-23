@@ -19,6 +19,13 @@ class MovieCatalog extends Component
     /** Filmes exibidos por página. */
     public const PER_PAGE = 30;
 
+    /** Escuta busca live do hero (Alpine.js dispatch). */
+    public function setBusca(string $value): void
+    {
+        $this->busca = $value;
+        $this->resetPage();
+    }
+
     /** Categoria selecionada (?categorias=ID). */
     #[Url(as: 'categorias', except: '')]
     public $categoriaId = '';
@@ -93,7 +100,7 @@ class MovieCatalog extends Component
             if (config('database.default') === 'sqlite') {
                 $query->where('name', 'like', '%'.$termo.'%');
             } else {
-                $query->whereRaw('MATCH(name, realname) AGAINST (? IN BOOLEAN MODE)', [$termo]);
+                $query->whereRaw('MATCH(name, realname, sinopse) AGAINST (? IN BOOLEAN MODE)', [$termo]);
             }
         }
 

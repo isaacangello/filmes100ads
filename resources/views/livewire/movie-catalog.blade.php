@@ -22,20 +22,14 @@
         </span>
     </div>
 
-    {{-- ======================= BUSCA ======================= --}}
-    <div class="mt-4 flex flex-wrap items-center gap-3">
-        <div class="relative min-w-0 flex-1 sm:max-w-sm">
-            <i class="fas fa-magnifying-glass pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-xs text-faint"></i>
-            <input type="search" wire:model.live.debounce.400ms="busca" placeholder="Buscar por título…"
-                class="fda-input pl-9" aria-label="Buscar filmes por título">
-        </div>
-
-        @if (trim((string) $busca) !== '' || $categoriaId !== '' || $ano !== '')
+    {{-- ======================= LIMPAR FILTROS ======================= --}}
+    @if (trim((string) $busca) !== '' || $categoriaId !== '' || $ano !== '')
+        <div class="mt-4">
             <button type="button" wire:click="limparFiltros" class="fda-btn fda-btn-ghost">
                 <i class="fas fa-xmark text-xs"></i> Limpar filtros
             </button>
-        @endif
-    </div>
+        </div>
+    @endif
 
     {{-- ======================= GRADE DE FILMES ======================= --}}
     @if ($posts->count())

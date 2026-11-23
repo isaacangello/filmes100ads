@@ -57,14 +57,32 @@
                     </h1>
                 </div>
 
-                {{-- BUSCA --}}
-                <form action="{{ route('index') }}" method="GET" class="w-full sm:w-auto sm:min-w-[240px]">
+                {{-- BUSCA LIVE via Alpine.js + Livewire dispatch --}}
+                <div x-data="{
+                    query: '{{ request('busca', '') }}',
+                    timer: null,
+                    update() {
+                        clearTimeout(this.timer);
+                        this.timer = setTimeout(() => {
+                            const params = new URLSearchParams(window.location.search);
+                            if (this.query.trim()) {
+                                params.set('busca', this.query.trim());
+                            } else {
+                                params.delete('busca');
+                            }
+                            const url = new URL(window.location);
+                            url.search = params.toString();
+                            window.history.replaceState({}, '', url);
+                            Livewire.dispatch('setBusca', { value: this.query.trim() });
+                        }, 400);
+                    }
+                }" class="w-full sm:w-auto sm:min-w-[240px]">
                     <div class="relative">
                         <i class="fas fa-magnifying-glass pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-xs text-faint"></i>
-                        <input type="search" name="busca" value="{{ request('busca', '') }}" placeholder="Buscar por título…"
+                        <input type="search" x-model="query" @input="update()" placeholder="Buscar por título…"
                             class="fda-input pl-9 w-full">
                     </div>
-                </form>
+                </div>
             </div>
 
             {{-- LINHA DE CONTADORES + EXPLORAR --}}

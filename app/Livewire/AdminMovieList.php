@@ -122,7 +122,7 @@ class AdminMovieList extends Component
             if (config('database.default') === 'sqlite') {
                 $query->where('posts.name', 'like', '%'.$termo.'%');
             } else {
-                $query->whereRaw('MATCH(posts.name, posts.realname) AGAINST (? IN BOOLEAN MODE)', [$termo]);
+                $query->whereRaw('MATCH(posts.name, posts.realname, posts.sinopse) AGAINST (? IN BOOLEAN MODE)', [$termo]);
             }
         }
 
