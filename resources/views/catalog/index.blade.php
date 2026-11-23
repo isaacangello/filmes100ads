@@ -21,7 +21,7 @@
 
         <div class="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 
-            {{-- FILTROS DE CATEGORIA E ANO (acima do slogan) --}}
+            {{-- FILTROS: Categorias + Anos em uma linha só (acima do slogan) --}}
             <div class="fda-scroll-x -mx-4 flex gap-2 px-4 pb-3 sm:mx-0 sm:flex-wrap sm:px-0">
                 <span class="text-xs text-muted self-center mr-1"><i class="fas fa-filter text-[0.6rem]"></i> Filtros:</span>
                 <a href="{{ route('index') }}" class="fda-chip {{ request('categorias') === null && request('ano') === null ? 'fda-chip-active' : '' }}">
@@ -33,13 +33,6 @@
                         {{ $cat->name }}
                     </a>
                 @endforeach
-            </div>
-
-            <div class="fda-scroll-x -mx-4 mt-2 flex gap-2 px-4 pb-3 sm:mx-0 sm:flex-wrap sm:px-0">
-                <span class="text-xs text-muted self-center mr-1"><i class="fas fa-calendar text-[0.6rem]"></i> Ano:</span>
-                <a href="{{ route('index') }}" class="fda-chip {{ request('ano') === null ? 'fda-chip-active' : '' }}">
-                    Todos
-                </a>
                 @php $anoCorrente = (int) date('Y'); @endphp
                 @foreach(range($anoCorrente, $anoCorrente - 2) as $anoItem)
                     <a href="{{ route('index', ['ano' => $anoItem]) }}"
@@ -57,7 +50,7 @@
                     </h1>
                 </div>
 
-                {{-- BUSCA LIVE via Alpine.js + Livewire dispatch --}}
+                {{-- BUSCA LIVE via Alpine.js + Livewire dispatch (debounce 400ms) --}}
                 <div x-data="{
                     query: '{{ request('busca', '') }}',
                     timer: null,
