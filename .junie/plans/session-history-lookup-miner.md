@@ -209,4 +209,7 @@ Deploy executado com sucesso via `./scripts/deploy.sh`. Todo o código subido pa
 ### ✓ Step 5: Corrigir erro 403 do deploy
 Corrigido `.htaccess.htdocs` removendo regras que bloqueavam arquivos com ponto no nome. Corrigido `deploy-setup.php` para ler `DEPLOY_KEY` do `env.production` como fallback e criar `bootstrap/cache` antes das migrations. Commit 808e091.
 
+### ✓ Step 6: Completar migrations de performance no servidor
+A migration `2026_11_22_110000_add_performance_indexes` falhou no servidor com erro 1061 (Duplicate key name) porque um deploy anterior parcial já criou alguns índices. Solução: tornar a migration idempotente com `runStatement()` que ignora erros 1061. Migration re-executada com sucesso via `deploy-setup.php` — todos os 9 índices criados (posts: user_id, status1, status2, ano, fulltext; categorias_posts: categoria_id, post_id; movie_cast: post_id; users: fulltext). Site respondendo normalmente (1.4MB HTML).
+
 Substituído `whereDate`/`whereMonth`/`whereYear` por `whereBetween` com timestamps em `EarningsService`. Substituída consulta separada de categorias por eager loading `Post::with('categorias:id,name')` em `MovieCatalog`. View `movie-catalog.blade.php` atualizada para usar `$post->categorias->first()`.

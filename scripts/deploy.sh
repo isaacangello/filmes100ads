@@ -198,6 +198,12 @@ open ftp://${FTP_USER}:${FTP_PASS}@${FTP_HOST}
 # Upload .htaccess to htdocs/ root (P4O pattern: redirects to public/)
 put public/.htaccess.htdocs -o ${HTDOCS_PATH}.htaccess
 
+# Upload deploy-setup.php to htdocs/public/ (so .htaccess rewrite finds it)
+put public/deploy-setup.php -o ${HTDOCS_PATH}public/deploy-setup.php
+
+# Upload server-reset.php to htdocs/public/
+put public/server-reset.php -o ${HTDOCS_PATH}public/server-reset.php
+
 # Upload vendor.zip parts to htdocs/ (InfinityFree has ~10MB FTP limit)
 $(for part in vendor_part_*; do echo "put $part -o ${HTDOCS_PATH}${part}"; done)
 

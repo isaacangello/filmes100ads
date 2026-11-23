@@ -35,11 +35,6 @@ class AdminMovieList extends Component
     /** Mensagem de feedback. */
     public string $mensagem = '';
 
-    public function paginationView()
-    {
-        return 'pagination::fda';
-    }
-
     public function updatedBusca()
     {
         $this->resetPage();
