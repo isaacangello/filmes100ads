@@ -91,5 +91,11 @@ Route::prefix('/adm')->middleware('auth')->group(function () {
         // Download do dump SQL gerado pelo comando db:dump.
         Route::get('console/dump-download', [AdmConsoleController::class, 'downloadDump'])
             ->name('adm.console.dump.download');
+
+        // Seed TMDB com progresso em tempo real via AJAX.
+        Route::post('console/seed-tmdb', [AdmConsoleController::class, 'seedTmdb'])
+            ->name('adm.console.seed-tmdb');
+        Route::get('console/seed-tmdb/progress', [AdmConsoleController::class, 'seedTmdbProgress'])
+            ->name('adm.console.seed-tmdb.progress');
     });
 });

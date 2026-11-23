@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\File;
 use Illuminate\View\View;
 
 /**
@@ -33,12 +35,13 @@ class AdmConsoleController extends Controller
             'params' => ['--force' => true],
             'dangerous' => true,
         ],
-        'db:seed' => [
+        'db:seed-tmdb' => [
             'name' => 'Popular filmes TMDB',
-            'description' => 'Busca até 20.000 filmes da TMDB API e salva no banco.',
-            'command' => 'db:seed',
-            'params' => ['--class' => 'TmdbMoviesSeeder', '--force' => true],
+            'description' => 'Busca até 10.000 filmes da TMDB API e salva no banco com barra de progresso.',
+            'command' => 'db:seed-tmdb',
+            'params' => ['--max' => 10000],
             'dangerous' => false,
+            'ajax' => true,
         ],
         'db:populate-posters' => [
             'name' => 'Buscar capas dos filmes',
@@ -120,6 +123,68 @@ class AdmConsoleController extends Controller
             ->with('console_output', trim($output))
             ->with('console_exit_code', $exitCode)
             ->with('console_command_name', $commandConfig['name']);
+    }
+
+    /**
+     * Inicia o seed TMDB em background via AJAX.
+     */
+    public function seedTmdb(Request $request): JsonResponse
+    {
+        // Limpa progresso anterior
+        $progressFile = storage_path('app/tmdb_seed_progress.json');
+        if (file_exists($progressFile)) {
+            @unlink($progressFile);
+        }
+
+        // Inicia o comando em background usando proc_open
+        $maxMovies = $request->input('max', 10000);
+        $command = sprintf(
+            'cd %s && php artisan db:seed-tmdb --max=%d > /dev/null 2>&1 &',
+            base_path(),
+            (int) $maxMovies
+        );
+        $descriptors = [
+            0 => ['pipe', 'r'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ];
+        $process = proc_open($command, $descriptors, $pipes);
+        if (is_resource($process)) {
+            fclose($pipes[0]);
+            fclose($pipes[1]);
+            fclose($pipes[2]);
+            proc_close($process);
+        }
+
+        return response()->json(['status' => 'started', 'message' => 'Seed iniciado em background.']);
+    }
+
+    /**
+     * Retorna o progresso atual do seed TMDB.
+     */
+    public function seedTmdbProgress(): JsonResponse
+    {
+        $progressFile = storage_path('app/tmdb_seed_progress.json');
+        if (!file_exists($progressFile)) {
+            return response()->json(['status' => 'idle', 'message' => 'Nenhum seed em execução.']);
+        }
+
+        $content = file_get_contents($progressFile);
+        if (!$content) {
+            return response()->json(['status' => 'idle', 'message' => 'Nenhum seed em execução.']);
+        }
+
+        $data = json_decode($content, true);
+        if (!$data) {
+            return response()->json(['status' => 'error', 'message' => 'Erro ao ler progresso.']);
+        }
+
+        // Se terminou, limpa o arquivo
+        if (($data['status'] ?? '') === 'done') {
+            @unlink($progressFile);
+        }
+
+        return response()->json($data);
     }
 
     /**

@@ -121,9 +121,42 @@
                                 </template>
                             @endif
 
-                            <button type="submit" class="fda-btn fda-btn-primary text-xs w-full">
-                                <i class="fas fa-play text-[0.6rem]"></i> Executar
-                            </button>
+                            @if ($cmd['ajax'] && $key === 'db:seed-tmdb')
+                                {{-- Seed TMDB com barra de progresso via AJAX --}}
+                                <div x-data="tmdbSeed()">
+                                    <button type="button" @click="start()" :disabled="running || done"
+                                        class="fda-btn fda-btn-primary text-xs w-full" :class="{'opacity-50 cursor-not-allowed': running || done}">
+                                        <template x-if="!running && !done">
+                                            <span><i class="fas fa-play text-[0.6rem]"></i> Executar</span>
+                                        </template>
+                                        <template x-if="running">
+                                            <span><i class="fas fa-spinner fa-spin text-[0.6rem]"></i> <span x-text="message"></span></span>
+                                        </template>
+                                        <template x-if="done">
+                                            <span><i class="fas fa-check-circle text-[0.6rem] text-green-400"></i> Concluído</span>
+                                        </template>
+                                    </button>
+                                    <template x-if="running || done">
+                                        <div class="mt-3">
+                                            <div class="flex justify-between text-xs text-muted mb-1">
+                                                <span x-text="created + ' / ' + max + ' filmes'"></span>
+                                                <span x-text="Math.round((created / max) * 100) + '%'"></span>
+                                            </div>
+                                            <div class="w-full bg-ink-600 rounded-full h-2.5 overflow-hidden">
+                                                <div class="bg-gradient-to-r from-blue-500 to-green-500 h-2.5 rounded-full transition-all duration-300"
+                                                     :style="'width: ' + ((created / max) * 100) + '%'" x-ref="bar"></div>
+                                            </div>
+                                            <template x-if="skipped > 0">
+                                                <p class="mt-1 text-xs text-amber-400">Pulados: <span x-text="skipped"></span></p>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            @else
+                                <button type="submit" class="fda-btn fda-btn-primary text-xs w-full">
+                                    <i class="fas fa-play text-[0.6rem]"></i> Executar
+                                </button>
+                            @endif
                         </form>
                     </div>
                 </div>
@@ -138,4 +171,61 @@
         O comando <code class="bg-ink-700 px-1 py-0.5 rounded">db:populate-posters</code> pode levar vários minutos dependendo do número de filmes.
     </div>
 </div>
+
+<script>
+// Componente Alpine.js para o seed TMDB com barra de progresso
+document.addEventListener('alpine:init', () => {
+    Alpine.data('tmdbSeed', () => ({
+        running: false,
+        done: false,
+        created: 0,
+        skipped: 0,
+        max: 10000,
+        message: '',
+        pollInterval: null,
+
+        start() {
+            this.running = true;
+            this.done = false;
+            this.created = 0;
+            this.skipped = 0;
+            this.message = 'Iniciando...';
+
+            // Inicia o seed via AJAX
+            fetch('{{ route('adm.console.seed-tmdb') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ||
+                        document.querySelector('input[name="_token"]')?.value || ''
+                },
+                body: JSON.stringify({ max: 10000 })
+            }).then(() => {
+                // Inicia polling do progresso
+                this.pollInterval = setInterval(() => this.poll(), 1000);
+            });
+        },
+
+        poll() {
+            fetch('{{ route('adm.console.seed-tmdb.progress') }}')
+                .then(res => res.json())
+                .then(data => {
+                    this.message = data.message || '';
+                    if (data.created !== undefined) this.created = data.created;
+                    if (data.skipped !== undefined) this.skipped = data.skipped;
+                    if (data.max !== undefined) this.max = data.max;
+
+                    if (data.status === 'done' || data.status === 'error') {
+                        this.running = false;
+                        this.done = true;
+                        if (this.pollInterval) clearInterval(this.pollInterval);
+                    }
+                })
+                .catch(() => {
+                    // Erro de polling — continua tentando
+                });
+        }
+    }));
+});
+</script>
 @endsection
