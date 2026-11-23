@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Categoria;
 use App\Models\Post;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -19,7 +20,8 @@ class MovieCatalog extends Component
     /** Filmes exibidos por página. */
     public const PER_PAGE = 30;
 
-    /** Escuta busca live do hero (Alpine.js dispatch). */
+    /** Escuta busca live do hero (Alpine.js dispatch com debounce 400ms). */
+    #[On('setBusca')]
     public function setBusca(string $value): void
     {
         $this->busca = $value;
