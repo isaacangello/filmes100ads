@@ -213,3 +213,12 @@ Corrigido `.htaccess.htdocs` removendo regras que bloqueavam arquivos com ponto 
 A migration `2026_11_22_110000_add_performance_indexes` falhou no servidor com erro 1061 (Duplicate key name) porque um deploy anterior parcial já criou alguns índices. Solução: tornar a migration idempotente com `runStatement()` que ignora erros 1061. Migration re-executada com sucesso via `deploy-setup.php` — todos os 9 índices criados (posts: user_id, status1, status2, ano, fulltext; categorias_posts: categoria_id, post_id; movie_cast: post_id; users: fulltext). Site respondendo normalmente (1.4MB HTML).
 
 Substituído `whereDate`/`whereMonth`/`whereYear` por `whereBetween` com timestamps em `EarningsService`. Substituída consulta separada de categorias por eager loading `Post::with('categorias:id,name')` em `MovieCatalog`. View `movie-catalog.blade.php` atualizada para usar `$post->categorias->first()`.
+
+### ✓ Step 7: Corrigir paginação sem números
+A view `pagination::fda` existia em `resources/views/vendor/pagination/fda.blade.php` mas não foi enviada ao servidor. Ao remover `paginationView()` dos componentes, o Livewire caiu para paginação simples sem números. Solução: restaurar `paginationView()` nos 3 componentes (MovieCatalog, AdminMovieList, UserManager) e subir a view ao servidor via FTP.
+
+### ✓ Step 8: Criar usuários admin no servidor
+Os usuários admin não existiam no banco de produção, impedindo login. Criado `public/setup-users.php` (script auto-destrutivo protegido por DEPLOY_KEY) que cria Isaac e Root com `is_admin=true` e senha "password". Script executado com sucesso via solve-antibot.
+
+### * Step 9: Popular filmes no servidor via console ADM
+O servidor tem ~3000 filmes. O usuário precisa acessar `/adm/console` logado e clicar em "Popular filmes TMDB" para buscar os 10.000 filmes da API TMDB.
