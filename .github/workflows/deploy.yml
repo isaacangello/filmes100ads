@@ -21,21 +21,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
+      - name: Build assets
         run: npm run build
         env:
           NODE_ENV: production
 
-      - name: Setup PHP 8.4
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-          tools: composer
-
-      - name: Install PHP dependencies
-        run: composer install --no-dev --optimize-autoloader
-
-      - name: Deploy via FTP (full with vendor)
+      - name: Deploy via FTP (sem vendor)
         env:
           DOTENV: ${{ secrets.DOTENV }}
         run: |
@@ -46,12 +37,10 @@ jobs:
             set ftp:chmod-default '';
             open ftp://${{ secrets.FTP_USER }}:${{ secrets.FTP_PASS }}@${{ secrets.FTP_HOST }};
             cd /htdocs;
-            # Upload Laravel root files
-            mirror --reverse --no-perms --exclude-glob='vendor/*' --exclude-glob='node_modules/*' --exclude-glob='.git/*' --exclude-glob='storage/logs/*' --exclude-glob='storage/framework/cache/*' --exclude-glob='storage/framework/sessions/*' --exclude-glob='storage/framework/views/*' --exclude-glob='storage/framework/testing/*' --exclude-glob='public/*' --exclude-glob='wallet-mintme/*' . /htdocs/;
-            # Upload public/ to htdocs/public/
+            # Upload apenas arquivos do projeto (sem vendor/ nem node_modules/)
+            mirror --reverse --no-perms --exclude-glob='vendor/*' --exclude-glob='node_modules/*' --exclude-glob='.git/*' --exclude-glob='storage/logs/*' --exclude-glob='storage/framework/cache/*' --exclude-glob='storage/framework/sessions/*' --exclude-glob='storage/framework/views/*' --exclude-glob='storage/framework/testing/*' --exclude-glob='public/*' --exclude-glob='wallet-mintme/*' --exclude-glob='*.zip' --exclude-glob='vendor_part_*' . /htdocs/;
+            # Upload public/ (com assets compilados)
             mirror --reverse --no-perms public/ /htdocs/public/;
-            # Upload vendor/ to htdocs/vendor/
-            mirror --reverse --no-perms vendor/ /htdocs/vendor/;
             # Upload .env
             put /tmp/env_tmp -o /htdocs/.env;
             quit
@@ -59,5 +48,4 @@ jobs:
 
       - name: Clear caches via browser
         run: |
-          # Use the server-reset.php to clear caches
           curl -s "http://filmes100ads.free.nf/server-reset.php?key=${{ secrets.DEPLOY_KEY }}&action=reset" --max-time 30 || true
