@@ -14,51 +14,77 @@
 
 @section('content')
 
-    {{-- ======================= HERO ======================= --}}
+    {{-- ======================= HERO COMPACTO ======================= --}}
     <section class="relative overflow-hidden border-b border-line bg-gradient-to-b from-ink-900 to-ink-950">
-        <div class="pointer-events-none absolute -top-32 left-0 h-96 w-[900px] rounded-full bg-brand/20 blur-[120px]"></div>
-        <div class="pointer-events-none absolute -top-24 right-0 h-80 w-[700px] rounded-full bg-indigo-600/15 blur-[120px]"></div>
+        <div class="pointer-events-none absolute -top-32 left-0 h-64 w-[600px] rounded-full bg-brand/15 blur-[100px]"></div>
+        <div class="pointer-events-none absolute -top-20 right-0 h-48 w-[500px] rounded-full bg-indigo-600/10 blur-[80px]"></div>
 
-        <div class="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
-            <h1 class="max-w-3xl text-4xl leading-[1.06] font-extrabold tracking-tight sm:text-5xl">
-                Assista filmes <span class="text-brand">sem chatisse</span>,<br>
-                sem propagandas.
-            </h1>
-            <p class="mt-5 max-w-xl text-base leading-relaxed text-muted">
-                Um catálogo de filmes com sinopse, ficha técnica e links de servidores para assistir
-                direto — sem commercials no meio do filme e sem rastreamento.
-            </p>
+        <div class="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 
-            <div class="mt-7 flex flex-wrap gap-3">
+            {{-- FILTROS DE CATEGORIA E ANO (acima do slogan) --}}
+            <div class="fda-scroll-x -mx-4 flex gap-2 px-4 pb-3 sm:mx-0 sm:flex-wrap sm:px-0">
+                <span class="text-xs text-muted self-center mr-1"><i class="fas fa-filter text-[0.6rem]"></i> Filtros:</span>
+                <a href="{{ route('index') }}" class="fda-chip {{ request('categorias') === null && request('ano') === null ? 'fda-chip-active' : '' }}">
+                    Todos
+                </a>
+                @foreach($categoriasMenu ?? [] as $cat)
+                    <a href="{{ route('index', ['categorias' => $cat->id]) }}"
+                        class="fda-chip {{ (string) request('categorias') === (string) $cat->id ? 'fda-chip-active' : '' }}">
+                        {{ $cat->name }}
+                    </a>
+                @endforeach
+            </div>
+
+            <div class="fda-scroll-x -mx-4 mt-2 flex gap-2 px-4 pb-3 sm:mx-0 sm:flex-wrap sm:px-0">
+                <span class="text-xs text-muted self-center mr-1"><i class="fas fa-calendar text-[0.6rem]"></i> Ano:</span>
+                <a href="{{ route('index') }}" class="fda-chip {{ request('ano') === null ? 'fda-chip-active' : '' }}">
+                    Todos
+                </a>
+                @php $anoCorrente = (int) date('Y'); @endphp
+                @foreach(range($anoCorrente, $anoCorrente - 2) as $anoItem)
+                    <a href="{{ route('index', ['ano' => $anoItem]) }}"
+                        class="fda-chip {{ (string) request('ano') === (string) $anoItem ? 'fda-chip-active' : '' }}">
+                        {{ $anoItem }}
+                    </a>
+                @endforeach
+            </div>
+
+            {{-- SLOGAN EM UMA LINHA + BUSCA --}}
+            <div class="mt-4 flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
+                <div class="flex-1">
+                    <h1 class="text-2xl font-extrabold tracking-tight sm:text-3xl lg:text-4xl">
+                        Filmes <span class="text-brand">sem chatisse</span>, sem propagandas
+                    </h1>
+                </div>
+
+                {{-- BUSCA --}}
+                <form action="{{ route('index') }}" method="GET" class="w-full sm:w-auto sm:min-w-[240px]">
+                    <div class="relative">
+                        <i class="fas fa-magnifying-glass pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-xs text-faint"></i>
+                        <input type="search" name="busca" value="{{ request('busca', '') }}" placeholder="Buscar por título…"
+                            class="fda-input pl-9 w-full">
+                    </div>
+                </form>
+            </div>
+
+            {{-- LINHA DE CONTADORES + EXPLORAR --}}
+            <div class="mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-center sm:justify-start">
                 <a href="#catalogo" class="fda-btn fda-btn-primary">
                     <i class="fas fa-film text-xs"></i> Explorar catálogo
                 </a>
-                @auth
-                    <a href="{{ route('adm') }}" class="fda-btn fda-btn-ghost">
-                        <i class="fas fa-user-circle text-xs"></i> Minha área
-                    </a>
-                @endauth
-            </div>
-
-            <div class="mt-11 flex flex-wrap gap-x-10 gap-y-5">
-                <div>
-                    <strong class="block text-2xl font-extrabold tracking-tight">{{ number_format($totalFilmes) }}</strong>
-                    <span class="text-xs tracking-[0.09em] text-muted uppercase">Filmes</span>
-                </div>
-                <div>
-                    <strong class="block text-2xl font-extrabold tracking-tight">{{ number_format($totalCategorias) }}</strong>
-                    <span class="text-xs tracking-[0.09em] text-muted uppercase">Categorias</span>
-                </div>
-                <div>
-                    <strong class="block text-2xl font-extrabold tracking-tight">0</strong>
-                    <span class="text-xs tracking-[0.09em] text-muted uppercase">Propagandas</span>
+                <div class="flex items-center gap-4 text-sm">
+                    <span class="text-muted">{{ number_format($totalFilmes) }} <strong class="text-white">filmes</strong></span>
+                    <span class="text-muted">•</span>
+                    <span class="text-muted">{{ number_format($totalCategorias) }} <strong class="text-white">categorias</strong></span>
+                    <span class="text-muted">•</span>
+                    <span class="text-muted"><strong class="text-white">0</strong> propagandas</span>
                 </div>
             </div>
         </div>
     </section>
 
     {{-- ======================= CATÁLOGO (Livewire) ======================= --}}
-    <section id="catalogo" class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <section id="catalogo" class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <livewire:movie-catalog />
     </section>
 

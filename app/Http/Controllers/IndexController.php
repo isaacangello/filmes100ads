@@ -32,6 +32,7 @@ class IndexController extends Controller
         return view('catalog.index', [
             'totalFilmes' => Post::count(),
             'totalCategorias' => Categoria::count(),
+            'categoriasMenu' => Categoria::all(),
         ]);
     }
 }

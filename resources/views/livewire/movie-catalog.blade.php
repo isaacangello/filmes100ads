@@ -1,6 +1,6 @@
 <div wire:key="movie-catalog">
 
-    {{-- ======================= CABEÇALHO + FILTROS ======================= --}}
+    {{-- ======================= CABEÇALHO ======================= --}}
     <div class="flex flex-wrap items-baseline justify-between gap-3 border-b border-line pb-4">
         <h2 class="text-xl font-bold tracking-tight">
             @if ($categoria)
@@ -23,49 +23,18 @@
     </div>
 
     {{-- ======================= BUSCA ======================= --}}
-    <div class="mt-6 flex flex-wrap items-center gap-3">
+    <div class="mt-4 flex flex-wrap items-center gap-3">
         <div class="relative min-w-0 flex-1 sm:max-w-sm">
             <i class="fas fa-magnifying-glass pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-xs text-faint"></i>
             <input type="search" wire:model.live.debounce.400ms="busca" placeholder="Buscar por título…"
                 class="fda-input pl-9" aria-label="Buscar filmes por título">
         </div>
 
-        @if (trim((string) $busca) !== '' || $categoriaId !== '')
+        @if (trim((string) $busca) !== '' || $categoriaId !== '' || $ano !== '')
             <button type="button" wire:click="limparFiltros" class="fda-btn fda-btn-ghost">
                 <i class="fas fa-xmark text-xs"></i> Limpar filtros
             </button>
         @endif
-    </div>
-
-    {{-- ======================= CHIPS DE CATEGORIAS ======================= --}}
-    <div class="fda-scroll-x -mx-4 mt-4 flex gap-2 px-4 pb-2 sm:mx-0 sm:flex-wrap sm:px-0">
-        <button type="button" wire:click="$set('categoriaId', '')"
-            class="fda-chip {{ $categoriaId === '' ? 'fda-chip-active' : '' }}">
-            Todos
-        </button>
-
-        @foreach ($categorias as $item)
-            <button type="button" wire:click="$set('categoriaId', '{{ $item->id }}')"
-                class="fda-chip {{ (string) $categoriaId === (string) $item->id ? 'fda-chip-active' : '' }}">
-                {{ $item->name }}
-            </button>
-        @endforeach
-    </div>
-
-    {{-- ======================= CHIPS DE ANO ======================= --}}
-    <div class="fda-scroll-x -mx-4 mt-3 flex gap-2 px-4 pb-2 sm:mx-0 sm:flex-wrap sm:px-0">
-        <span class="text-xs text-muted self-center mr-1"><i class="fas fa-calendar text-[0.6rem]"></i> Ano:</span>
-        <button type="button" wire:click="$set('ano', '')"
-            class="fda-chip {{ $ano === '' ? 'fda-chip-active' : '' }}">
-            Todos
-        </button>
-
-        @foreach ($anosDisponiveis as $anoItem)
-            <button type="button" wire:click="$set('ano', '{{ $anoItem }}')"
-                class="fda-chip {{ (string) $ano === (string) $anoItem ? 'fda-chip-active' : '' }}">
-                {{ $anoItem }}
-            </button>
-        @endforeach
     </div>
 
     {{-- ======================= GRADE DE FILMES ======================= --}}
