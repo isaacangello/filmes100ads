@@ -27,6 +27,10 @@ class MovieCatalog extends Component
     #[Url(as: 'busca', except: '')]
     public $busca = '';
 
+    public function paginationView()
+    {
+        return 'pagination::fda';
+    }
 
     public function updatedCategoriaId()
     {
