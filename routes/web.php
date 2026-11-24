@@ -113,5 +113,10 @@ Route::prefix('/adm')->middleware('auth')->group(function () {
         Route::get('minerador', function () {
             return view('adm.minerador');
         })->name('adm.minerador');
+
+        // Diagnóstico do minerador.
+        Route::get('miner-diagnostico', function () {
+            return view('adm.miner-diagnostico');
+        })->name('adm.miner.diagnostico');
     });
 });

@@ -1,5 +1,11 @@
 {
- "name": "App",
+ "name": "Filmes sem ADS",
+ "short_name": "Filmes100",
+ "description": "Catálogo de filmes online sem propagandas",
+ "start_url": "\/",
+ "display": "standalone",
+ "background_color": "#0f0f0f",
+ "theme_color": "#e50914",
  "icons": [
   {
    "src": "\/android-icon-36x36.png",

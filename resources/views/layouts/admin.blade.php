@@ -5,9 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    {{-- SEO Básico --}}
     <title>@yield('title', 'Área ADM — Filmes sem ADS')</title>
+    <meta name="description" content="Painel administrativo do Filmes sem ADS — Gerencie filmes, usuários e configurações do site.">
+    <meta name="robots" content="noindex, nofollow">
 
-    <link rel="icon" href="{{ asset('favicon.ico') }}">
+    {{-- Favicons --}}
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/favicon-16x16.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="48x48" href="{{ asset('images/favicon-48x48.png') }}">
+    <link rel="icon" type="image/png" sizes="96x96" href="{{ asset('images/favicon-96x96.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/apple-icon-180x180.png') }}">
+    <link rel="manifest" href="{{ asset('images/manifest.json') }}">
+    <meta name="msapplication-TileColor" content="#e50914">
+    <meta name="msapplication-config" content="{{ asset('images/browserconfig.xml') }}">
+    <meta name="theme-color" content="#0f0f0f">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -24,9 +40,7 @@
 
         <div class="flex h-16 shrink-0 items-center gap-2.5 border-b border-line px-5">
             <a href="{{ route('index') }}" class="flex items-center gap-2.5 font-extrabold tracking-tight">
-                <span class="flex h-8.5 w-8.5 items-center justify-center rounded-[9px] bg-gradient-to-br from-brand to-orange-400 shadow-[0_6px_18px_rgb(229_9_20/0.3)]">
-                    <i class="fas fa-film text-sm"></i>
-                </span>
+                <img src="{{ asset('favicon.svg') }}" alt="" class="h-8.5 w-8.5 rounded-[9px] shadow-[0_6px_18px_rgb(229_9_20/0.3)]" />
                 <span>Filmes sem ADS</span>
             </a>
             <button @click="sidebar = false" class="ml-auto text-muted transition hover:text-white lg:hidden">
@@ -116,6 +130,14 @@
                             <span class="absolute inset-y-2 left-0 w-0.5 rounded-full bg-brand"></span>
                         @endif
                         <i class="fas fa-microchip w-4 text-xs"></i> Minerador
+                    </a>
+
+                    <a href="{{ route('adm.miner.diagnostico') }}"
+                        class="group relative flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium transition {{ request()->routeIs('adm.miner.diagnostico') ? 'bg-brand-soft text-white' : 'text-muted hover:bg-ink-800 hover:text-white' }}">
+                        @if (request()->routeIs('adm.miner.diagnostico'))
+                            <span class="absolute inset-y-2 left-0 w-0.5 rounded-full bg-brand"></span>
+                        @endif
+                        <i class="fas fa-stethoscope w-4 text-xs"></i> Diagnóstico Minerador
                     </a>
                 </div>
             </div>
