@@ -3,7 +3,7 @@ name: Deploy to InfinityFree
 on:
   push:
     tags: ['v*']
-    branches: [newlaravel]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
