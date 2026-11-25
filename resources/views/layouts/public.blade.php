@@ -29,7 +29,7 @@
     <link rel="canonical" href="{{ url()->current() }}">
 
     {{-- Favicons --}}
-    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-filmes100ads.png') }}">
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/favicon-16x16.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon-32x32.png') }}">
@@ -109,7 +109,7 @@
     <header :inert="minerConsentRequired && minerConsent === ''" class="sticky top-0 z-50 border-b border-line bg-ink-950/85 backdrop-blur-xl">
         <div class="mx-auto flex h-16 max-w-7xl items-center gap-6 px-4 sm:px-6 lg:px-8">
             <a href="{{ route('index') }}" class="flex shrink-0 items-center gap-2.5 font-extrabold tracking-tight">
-                <img src="{{ asset('favicon.svg') }}" alt="" class="h-8.5 w-8.5 rounded-[9px] shadow-[0_6px_18px_rgb(229_9_20/0.35)]" />
+                <img src="{{ asset('images/logo-filmes100ads.png') }}" alt="" class="h-8.5 w-8.5 rounded-[9px] shadow-[0_6px_18px_rgb(229_9_20/0.35)]" />
                 <span class="hidden sm:inline">Filmes sem ADS</span>
             </a>
 
@@ -175,7 +175,7 @@
             <div class="grid gap-10 md:grid-cols-12">
                 <div class="md:col-span-5">
                     <a href="{{ route('index') }}" class="flex items-center gap-2.5 font-extrabold tracking-tight">
-                        <img src="{{ asset('favicon.svg') }}" alt="" class="h-8.5 w-8.5 rounded-[9px]" />
+                        <img src="{{ asset('images/logo-filmes100ads.png') }}" alt="" class="h-8.5 w-8.5 rounded-[9px]" />
                         <span>Filmes sem ADS</span>
                     </a>
                     <p class="mt-4 max-w-sm text-sm leading-relaxed text-muted">

@@ -11,7 +11,7 @@
     <meta name="robots" content="noindex, nofollow">
 
     {{-- Favicons --}}
-    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-filmes100ads.png') }}">
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/favicon-16x16.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon-32x32.png') }}">
@@ -40,7 +40,7 @@
 
         <div class="flex h-16 shrink-0 items-center gap-2.5 border-b border-line px-5">
             <a href="{{ route('index') }}" class="flex items-center gap-2.5 font-extrabold tracking-tight">
-                <img src="{{ asset('favicon.svg') }}" alt="" class="h-8.5 w-8.5 rounded-[9px] shadow-[0_6px_18px_rgb(229_9_20/0.3)]" />
+                <img src="{{ asset('images/logo-filmes100ads.png') }}" alt="" class="h-8.5 w-8.5 rounded-[9px] shadow-[0_6px_18px_rgb(229_9_20/0.3)]" />
                 <span>Filmes sem ADS</span>
             </a>
             <button @click="sidebar = false" class="ml-auto text-muted transition hover:text-white lg:hidden">
