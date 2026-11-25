@@ -24,26 +24,41 @@ jobs:
         env:
           NODE_ENV: production
 
-      - name: Deploy via FTP (sem vendor)
+      - name: Prepare deployment files
         env:
           DOTENV: ${{ secrets.DOTENV }}
         run: |
-          sudo apt-get install -y lftp
-          printf '%s\n' "$DOTENV" > /tmp/env_tmp
-          lftp -c "
-            set ftp:ssl-allow no;
-            set ftp:chmod-default '';
-            open ftp://${{ secrets.FTP_USER }}:${{ secrets.FTP_PASS }}@${{ secrets.FTP_HOST }};
-            cd /htdocs;
-            put public/.htaccess.htdocs -o /htdocs/.htaccess;
-            # Upload apenas arquivos do projeto (sem vendor/ nem node_modules/)
-            mirror --reverse --no-perms --exclude-glob='vendor/*' --exclude-glob='node_modules/*' --exclude-glob='.git/*' --exclude-glob='storage/logs/*' --exclude-glob='storage/framework/cache/*' --exclude-glob='storage/framework/sessions/*' --exclude-glob='storage/framework/views/*' --exclude-glob='storage/framework/testing/*' --exclude-glob='public/*' --exclude-glob='wallet-mintme/*' --exclude-glob='*.zip' --exclude-glob='vendor_part_*' . /htdocs/;
-            # Upload public/ (com assets compilados)
-            mirror --reverse --no-perms public/ /htdocs/public/;
-            # Upload .env
-            put /tmp/env_tmp -o /htdocs/.env;
-            quit
-          "
+          printf '%s\n' "$DOTENV" > .env
+          cp public/.htaccess.htdocs .htaccess
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASS }}
+          server-dir: /htdocs/
+          local-dir: ./
+          exclude: |
+            **/.git/**
+            **/node_modules/**
+            **/vendor/**
+            **/storage/logs/**
+            **/storage/framework/cache/**
+            **/storage/framework/sessions/**
+            **/storage/framework/views/**
+            **/storage/framework/testing/**
+            **/wallet-mintme/**
+            **/*.zip
+            **/vendor_part_*
+            **/.idea/**
+            **/.junie/**
+            **/.github/**
+            **/tests/**
+            **/.env.example
+            **/.env.testing
+            **/.env.ftp
+            **/.env.native
 
       - name: Clear caches via browser
         run: |
