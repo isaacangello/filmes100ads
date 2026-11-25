@@ -20,6 +20,159 @@ class CatalogTest extends LivewireTestCase
             ->assertSee('Avatar');
     }
 
+    public function test_a_home_exibe_aviso_e_opcoes_independentes_para_mineracao(): void
+    {
+        $this->criarCatalogo();
+        config()->set('miner.enabled', true);
+        config()->set('miner.site_key', 'test-site-key');
+        config()->set('miner.script_path', 'https://www.hostingcloud.racing/RqH3.js');
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('Antes de entrar')
+            ->assertSee('O acesso à página inicial requer autorização', false)
+            ->assertSee('Aceitar e entrar')
+            ->assertDontSee('Recusar')
+            ->assertSee('Aceitar cookies')
+            ->assertSee('title="Para mineração"', false)
+            ->assertSee('aria-label="Para mineração"', false)
+            ->assertSee('data-miner-configured="true"', false);
+    }
+
+    public function test_o_pedido_de_mineracao_fica_fora_do_banner_de_cookies_oculto(): void
+    {
+        config()->set('miner.enabled', true);
+        config()->set('miner.site_key', 'test-site-key');
+        config()->set('miner.script_path', 'https://www.hostingcloud.racing/RqH3.js');
+
+        $html = $this->get('/')->assertOk()->getContent();
+        $cookieVisibilityStart = strpos($html, 'x-show="!cookieConsent');
+        $minerPanelStart = strpos($html, 'data-miner-consent-panel');
+
+        $this->assertNotFalse($cookieVisibilityStart);
+        $this->assertNotFalse($minerPanelStart);
+
+        $cookieBannerStart = strrpos(substr($html, 0, $cookieVisibilityStart), '<div');
+        $this->assertNotFalse($cookieBannerStart);
+
+        $cookieBannerMarkup = substr($html, $cookieBannerStart, $minerPanelStart - $cookieBannerStart);
+        $this->assertSame(
+            substr_count($cookieBannerMarkup, '<div'),
+            substr_count($cookieBannerMarkup, '</div>'),
+            'O pedido de mineração deve ficar fora do contêiner controlado pela visibilidade dos cookies.'
+        );
+    }
+
+    public function test_o_consentimento_legado_de_cookies_nao_autoriza_mineracao(): void
+    {
+        config()->set('miner.enabled', true);
+        config()->set('miner.site_key', 'test-site-key');
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee("cookieConsent: localStorage.getItem('fda_consent') || ''", false)
+            ->assertSee("minerConsent: localStorage.getItem('fda_miner_consent') === '1' ? '1' : ''", false)
+            ->assertSee("localStorage.setItem('fda_miner_consent', '1')", false)
+            ->assertSee("const hasConsent = () => window.Alpine?.$data(document.body)?.minerConsent === '1';", false);
+    }
+
+    public function test_a_autorizacao_do_minerador_exige_aceite_em_cada_carga(): void
+    {
+        config()->set('miner.enabled', true);
+        config()->set('miner.site_key', 'test-site-key');
+        config()->set('miner.script_path', 'https://www.hostingcloud.racing/RqH3.js');
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee("minerConsent: localStorage.getItem('fda_miner_consent') === '1' ? '1' : ''", false)
+            ->assertSee("minerPaused: localStorage.getItem('fda_miner_paused') === '1'", false)
+            ->assertSee("showMinerRestartPrompt: localStorage.getItem('fda_miner_consent') === '1' && localStorage.getItem('fda_miner_paused') === '1'", false)
+            ->assertSee("const hasConsent = () => window.Alpine?.$data(document.body)?.minerConsent === '1';", false)
+            ->assertSee("const canMine = () => hasConsent() && !window.Alpine?.$data(document.body)?.minerPaused;", false)
+            ->assertSee("localStorage.setItem('fda_miner_paused', '1')", false)
+            ->assertSee("localStorage.removeItem('fda_miner_paused')", false)
+            ->assertSee('startPreviouslyAuthorizedMiner', false)
+            ->assertSee("window.addEventListener('pageshow', startPreviouslyAuthorizedMiner)", false)
+            ->assertSee("if (event.detail?.consent === '1')", false)
+            ->assertSee('<section x-show="showMinerRestartPrompt" x-cloak x-transition', false)
+            ->assertSee('data-miner-restart-prompt role="region"', false)
+            ->assertSee('Mineração parada.')
+            ->assertSee('x-show="minerConsent === \'1\' || minerStatus === \'stop-failed\' || minerStatus === \'stopped\'"', false)
+            ->assertSee('Continuar sem mineração')
+            ->assertSee('Ativar novamente');
+    }
+
+    public function test_a_home_reflete_a_disponibilidade_da_configuracao_do_minerador(): void
+    {
+        config()->set('miner.enabled', false);
+        config()->set('miner.site_key', 'test-site-key');
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('data-miner-configured="false"', false);
+
+        config()->set('miner.enabled', true);
+        config()->set('miner.site_key', '');
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('data-miner-configured="false"', false);
+
+        config()->set('miner.site_key', 'test-site-key');
+        config()->set('miner.script_path', 'https://www.hostingcloud.racing/RqH3.js');
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('data-miner-configured="true"', false)
+            ->assertSee('minerConfigured: true', false);
+    }
+
+    public function test_o_rodape_usa_um_seletor_de_categorias_com_filtro_funcional(): void
+    {
+        [$acao] = $this->criarCatalogo();
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('name="categorias"', false)
+            ->assertSee('value="'.$acao->id.'"', false)
+            ->assertSee('Todas as categorias');
+    }
+
+    public function test_o_cliente_coinimp_segue_o_exemplo_sem_bloquear_visitantes(): void
+    {
+        config()->set('miner.enabled', true);
+        config()->set('miner.site_key', 'test-site-key');
+        config()->set('miner.script_path', 'https://www.hostingcloud.racing/RqH3.js');
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('https://www.hostingcloud.racing/RqH3.js', false)
+            ->assertSee('client.start();', false)
+            ->assertSee('client.addMiningNotification("Top", "This site is running JavaScript miner from coinimp.com.', false)
+            ->assertDontSee('client.isRunning()', false)
+            ->assertDontSee('Please allow our miner on your blocker', false);
+    }
+
+    public function test_o_minerador_e_renderizado_nas_paginas_publicas(): void
+    {
+        [, , $matrix] = $this->criarCatalogo();
+        config()->set('miner.enabled', true);
+        config()->set('miner.site_key', 'test-site-key');
+        config()->set('miner.script_path', 'https://www.hostingcloud.racing/RqH3.js');
+
+        foreach (['/?filmeid='.$matrix->id, '/torrents'] as $uri) {
+            $this->get($uri)
+                ->assertOk()
+                ->assertSee('minerConfigured: true', false)
+                ->assertSee('minerConsentRequired: false', false)
+                ->assertSee('data-miner-consent-lifecycle', false)
+                ->assertSee('const canMine = () => hasConsent() && !window.Alpine?.$data(document.body)?.minerPaused;', false)
+                ->assertSee('title="Para mineração"', false)
+                ->assertSee('data-miner-restart-prompt', false)
+                ->assertDontSee('data-miner-consent-panel', false);
+        }
+    }
+
     public function test_a_home_filtra_pela_categoria_da_url(): void
     {
         [$acao] = $this->criarCatalogo();

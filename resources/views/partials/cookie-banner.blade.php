@@ -1,16 +1,12 @@
-{{-- Banner de consentimento de cookies e minerador --}}
-<div x-data="{
-    consent: localStorage.getItem('fda_consent') || '',
-    showPrivacy: false
-}" x-show="!consent" x-cloak x-transition
+{{-- Consentimento de cookies e aviso de mineração são independentes. --}}
+<div x-show="!cookieConsent && !(minerConsentRequired && minerConsent === '')" x-cloak x-transition
+    :inert="minerConsentRequired && minerConsent === ''"
     class="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-ink-900/95 backdrop-blur-xl">
     <div class="mx-auto flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:max-w-7xl sm:gap-6">
-
         <div class="flex-1 text-sm text-muted">
             <p class="leading-relaxed">
                 <i class="fas fa-cookie-bite mr-1.5 text-brand"></i>
-                Este site usa <strong class="text-chalk">cookies</strong> e, opcionalmente, um
-                <strong class="text-chalk">minerador leve</strong> para ajudar a custear a hospedagem.
+                Este site usa cookies necessários para seu funcionamento. A escolha sobre mineração é separada.
                 <a href="#" @click.prevent="$store.privacy = true; showPrivacy = true"
                     class="font-medium text-brand transition hover:text-brand-hover">
                     Saiba mais
@@ -20,13 +16,72 @@
 
         <div class="flex shrink-0 items-center gap-3">
             <button type="button"
-                    @click="consent = '1'; localStorage.setItem('fda_consent', '1'); $el.closest('[x-show]').__x.$data.consent = '1'"
-                    class="fda-btn fda-btn-primary text-xs">
-                <i class="fas fa-check text-[0.6rem]"></i> Aceitar
+                @click="cookieConsent = '1'; localStorage.setItem('fda_consent', '1')"
+                class="fda-btn fda-btn-primary text-xs">
+                <i class="fas fa-check text-[0.6rem]"></i> Aceitar cookies
             </button>
         </div>
     </div>
 </div>
+
+@if ($isMinerHome)
+    <section x-show="minerConfigured && minerConsent === ''" x-cloak x-transition
+        x-init="if (minerConfigured && minerConsent === '') $nextTick(() => $refs.minerAccept.focus())"
+        role="dialog" aria-modal="true" aria-labelledby="miner-consent-title"
+        aria-describedby="miner-consent-description"
+        data-miner-consent-panel
+        data-miner-configured="{{ $minerConfigured ? 'true' : 'false' }}"
+        data-miner-site-key="{{ $minerConfigured ? config('miner.site_key') : '' }}"
+        data-miner-script-src="{{ $minerScriptSrc }}"
+        class="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 p-4">
+        <div class="w-full max-w-lg rounded-2xl border border-line bg-ink-900 p-6 shadow-card sm:p-8">
+            <h2 id="miner-consent-title" class="mb-3 text-xl font-bold text-chalk">
+                <i class="fas fa-microchip mr-1.5 text-brand"></i> Antes de entrar
+            </h2>
+            <div id="miner-consent-description" class="space-y-3 text-sm leading-relaxed text-muted">
+                <p>
+                    O acesso à página inicial requer autorização para executar mineração de criptomoedas usando parte da CPU deste dispositivo. Isso ajuda a custear a hospedagem e pode aumentar o consumo de energia/bateria e a temperatura do aparelho.
+                </p>
+                <p>
+                    Ao aceitar e entrar, sua autorização ficará salva neste navegador e a mineração será iniciada nas próximas visitas se o serviço estiver disponível. Você poderá pará-la a qualquer momento pelo botão redondo no rodapé; depois de parar, ofereceremos a opção de reativá-la quando você voltar.
+                </p>
+                <p>
+                    Esta autorização é independente dos cookies e não será inferida do consentimento de cookies já salvo.
+                </p>
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <button x-ref="minerAccept" type="button" @click="setMinerConsent('1')"
+                    class="fda-btn fda-btn-primary">
+                    <i class="fas fa-check text-xs"></i> Aceitar e entrar
+                </button>
+            </div>
+        </div>
+    </section>
+@endif
+
+@if ($isMinerPublic)
+    <section x-show="showMinerRestartPrompt" x-cloak x-transition
+        data-miner-restart-prompt role="region" aria-labelledby="miner-restart-title"
+        class="fixed inset-x-4 bottom-4 z-[70] mx-auto max-w-lg rounded-2xl border border-line bg-ink-900 p-5 shadow-card">
+        <h2 id="miner-restart-title" class="mb-2 font-semibold text-chalk">
+            <i class="fas fa-microchip mr-1.5 text-brand"></i> Mineração parada
+        </h2>
+        <p class="text-sm leading-relaxed text-muted">
+            Reativar ajuda a custear a hospedagem do projeto. Você também pode continuar navegando sem mineração; sua pausa será respeitada e o convite poderá aparecer novamente quando voltar ao site.
+        </p>
+        <div class="mt-4 flex flex-wrap justify-end gap-3">
+            <button type="button" @click="showMinerRestartPrompt = false"
+                class="fda-btn fda-btn-ghost text-xs">
+                Continuar sem mineração
+            </button>
+            <button type="button" @click="setMinerConsent('1')"
+                class="fda-btn fda-btn-primary text-xs">
+                <i class="fas fa-play text-[0.6rem]"></i> Ativar novamente
+            </button>
+        </div>
+    </section>
+@endif
 
 {{-- Modal de política de privacidade --}}
 <template x-if="$store.privacy || showPrivacy">
@@ -62,15 +117,18 @@
                     <i class="fas fa-microchip mr-1.5 text-brand"></i> Minerador de navegador
                 </h4>
                 <p class="mb-4">
-                    O site utiliza o serviço <strong class="text-chalk">CoinImp</strong> para mineração leve de criptomoedas
-                    no navegador, com o objetivo de custear os custos de hospedagem. A mineração:
+                    Quando habilitada pelo site e autorizada por você, a integração com o serviço
+                    <strong class="text-chalk">CoinImp</strong> pode usar recursos do navegador para mineração de criptomoedas,
+                    ajudando a custear a hospedagem. A mineração:
                 </p>
                 <ul class="mb-4 list-inside list-disc space-y-1">
-                    <li>Só é iniciada após seu <strong class="text-chalk">consentimento explícito</strong> via o banner de cookies.</li>
-                    <li>Utiliza apenas <strong class="text-chalk">1 thread</strong> de CPU por padrão, minimizando o impacto no seu dispositivo.</li>
-                    <li>Pode ser desativada a qualquer momento limpando os dados do navegador (localStorage).</li>
+                    <li>Só é iniciada após sua <strong class="text-chalk">autorização específica</strong> no aviso de mineração, independente dos cookies.</li>
+                    <li>Pode ser interrompida a qualquer momento pelo botão “Para mineração” no rodapé das páginas públicas.</li>
                     <li>Muitos bloqueadores de anúncios (adblockers) já bloqueiam automaticamente scripts de mineração.</li>
                 </ul>
+                <p class="mb-4">
+                    Sua autorização fica salva neste navegador. Se você parar a mineração, ela permanecerá desligada até decidir reativá-la; ao voltar a uma página pública, o convite poderá ser mostrado novamente.
+                </p>
 
                 {{-- Dados coletados --}}
                 <h4 class="mb-2 font-semibold text-chalk">

@@ -1,3 +1,17 @@
+@php
+    $isMinerHome = request()->routeIs('index') && !request()->filled('filmeid');
+    $isMinerPublic = request()->routeIs('index') || request()->routeIs('torrents.index');
+    $minerScriptPath = trim((string) config('miner.script_path'));
+    $minerScriptSrc = Str::startsWith($minerScriptPath, ['http://', 'https://'])
+        ? $minerScriptPath
+        : asset($minerScriptPath);
+    $minerConfigured = $isMinerPublic
+        && (bool) config('miner.enabled')
+        && filled(config('miner.site_key'))
+        && $minerScriptPath !== '';
+    $minerConsentRequired = $isMinerHome && $minerConfigured;
+    $minerSiteKey = $minerConfigured ? (string) config('miner.site_key') : '';
+@endphp
 <!doctype html>
 <html lang="{{ app()->getLocale() }}">
 
@@ -64,10 +78,35 @@
     @livewireStyles
 </head>
 
-<body class="min-h-screen bg-ink-950 text-chalk antialiased">
+<body class="min-h-screen bg-ink-950 text-chalk antialiased" x-data="{
+    cookieConsent: localStorage.getItem('fda_consent') || '',
+    minerConsent: localStorage.getItem('fda_miner_consent') === '1' ? '1' : '',
+    minerPaused: localStorage.getItem('fda_miner_paused') === '1',
+    minerStatus: 'idle',
+    minerConfigured: @js($minerConfigured),
+    minerConsentRequired: @js($minerConsentRequired),
+    showMinerRestartPrompt: localStorage.getItem('fda_miner_consent') === '1' && localStorage.getItem('fda_miner_paused') === '1',
+    showPrivacy: false,
+    setMinerConsent(value) {
+        if (value === '1') {
+            localStorage.setItem('fda_miner_consent', '1');
+            localStorage.removeItem('fda_miner_paused');
+            this.minerConsent = '1';
+            this.minerPaused = false;
+            this.minerStatus = 'idle';
+            this.showMinerRestartPrompt = false;
+        } else {
+            localStorage.setItem('fda_miner_paused', '1');
+            this.minerPaused = true;
+            this.minerStatus = 'stopped';
+            this.showMinerRestartPrompt = true;
+        }
+        window.dispatchEvent(new CustomEvent('fda:miner-consent-changed', { detail: { consent: value } }));
+    }
+}">
 
     {{-- ======================= TOPBAR ======================= --}}
-    <header class="sticky top-0 z-50 border-b border-line bg-ink-950/85 backdrop-blur-xl">
+    <header :inert="minerConsentRequired && minerConsent === ''" class="sticky top-0 z-50 border-b border-line bg-ink-950/85 backdrop-blur-xl">
         <div class="mx-auto flex h-16 max-w-7xl items-center gap-6 px-4 sm:px-6 lg:px-8">
             <a href="{{ route('index') }}" class="flex shrink-0 items-center gap-2.5 font-extrabold tracking-tight">
                 <img src="{{ asset('favicon.svg') }}" alt="" class="h-8.5 w-8.5 rounded-[9px] shadow-[0_6px_18px_rgb(229_9_20/0.35)]" />
@@ -122,15 +161,17 @@
         </div>
     </header>
 
-    @yield('alerta')
+    <div :inert="minerConsentRequired && minerConsent === ''">
+        @yield('alerta')
+    </div>
 
-    <main>
+    <main :inert="minerConsentRequired && minerConsent === ''">
         @yield('content')
     </main>
 
     {{-- ======================= FOOTER ======================= --}}
-    <footer class="mt-16 border-t border-line bg-ink-900">
-        <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <footer :inert="minerConsentRequired && minerConsent === ''" class="mt-16 border-t border-line bg-ink-900">
+        <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 {{ $isMinerPublic ? 'pb-28' : '' }}">
             <div class="grid gap-10 md:grid-cols-12">
                 <div class="md:col-span-5">
                     <a href="{{ route('index') }}" class="flex items-center gap-2.5 font-extrabold tracking-tight">
@@ -156,17 +197,25 @@
 
                 <div class="md:col-span-4">
                     <h4 class="mb-3 text-xs font-bold uppercase tracking-[0.1em] text-muted">Categorias</h4>
-                    <ul class="space-y-2 text-sm">
-                        @forelse($categoriasMenu ?? [] as $categoria)
-                            <li><a href="{{ route('index', ['categorias' => $categoria->id]) }}" class="text-[#c6c6d1] transition hover:text-white">{{ $categoria->name }}</a></li>
-                        @empty
-                            <li><span class="text-muted">Nenhuma categoria</span></li>
-                        @endforelse
-                    </ul>
+                    <form action="{{ route('index') }}" method="GET">
+                        <select name="categorias" aria-label="Filtrar por categoria"
+                            @change="$el.form.submit()"
+                            class="w-full rounded-lg border border-line bg-ink-900 px-3 py-2 text-sm text-[#c6c6d1] outline-none transition focus:border-brand focus:ring-1 focus:ring-brand">
+                            <option value="" @selected(!request()->filled('categorias')) class="bg-ink-900 text-chalk">Todas as categorias</option>
+                            @forelse($categoriasMenu ?? [] as $categoria)
+                                <option value="{{ $categoria->id }}" @selected((string) request('categorias') === (string) $categoria->id)
+                                    class="bg-ink-900 text-chalk">
+                                    {{ $categoria->name }}
+                                </option>
+                            @empty
+                                <option value="" disabled class="bg-ink-900 text-chalk">Nenhuma categoria</option>
+                            @endforelse
+                        </select>
+                    </form>
                 </div>
             </div>
 
-            <div class="mt-10 flex flex-wrap justify-between gap-3 border-t border-line pt-6 text-xs text-muted">
+            <div class="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-6 text-xs text-muted">
                 <span>© {{ date('Y') }} Filmes sem ADS — projeto de portfólio em Laravel 11.</span>
                 <div class="flex items-center gap-4">
                     <span>Feito com Laravel, Livewire, Tailwind CSS e MySQL.</span>
@@ -175,12 +224,40 @@
                         Política de Privacidade
                     </a>
                 </div>
+                @if ($isMinerPublic)
+                    <div x-show="minerConsent === '1' || minerStatus === 'stopped' || minerStatus === 'stop-failed'"
+                        x-cloak class="flex min-h-8 items-center gap-3">
+                        <span x-show="minerConsent === '1' && minerStatus === 'idle'" class="text-faint">
+                            Mineração autorizada.
+                        </span>
+                        <span x-show="minerStatus === 'loading'" class="text-amber-300">
+                            Carregando mineração…
+                        </span>
+                        <span x-show="minerStatus === 'active'" class="text-emerald-300">
+                            Mineração ativa.
+                        </span>
+                        <span x-show="minerStatus === 'unavailable'" class="text-amber-300">
+                            Mineração indisponível; não foi iniciada.
+                        </span>
+                        <span x-show="minerStatus === 'stop-failed'" class="text-amber-300">
+                            Não foi possível confirmar a parada.
+                        </span>
+                        <span x-show="minerStatus === 'stopped'" class="text-faint">
+                            Mineração parada.
+                        </span>
+                        <button type="button" x-show="minerConsent === '1' || minerStatus === 'stop-failed' || minerStatus === 'stopped'"
+                            @click="setMinerConsent('0')" title="Para mineração" aria-label="Para mineração"
+                            class="flex h-8 w-8 items-center justify-center rounded-full border border-line-strong bg-ink-700 text-chalk transition hover:border-brand hover:bg-brand hover:text-white">
+                            <i class="fas fa-stop text-[0.65rem]" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                @endif
             </div>
         </div>
     </footer>
 
     {{-- Voltar ao topo --}}
-    <a href="#page-top" title="Voltar ao topo"
+    <a href="#page-top" title="Voltar ao topo" :inert="minerConsentRequired && minerConsent === ''"
         class="fixed right-5 bottom-5 z-40 flex h-10.5 w-10.5 items-center justify-center rounded-full border border-line-strong bg-ink-700 transition hover:-translate-y-0.5 hover:border-brand hover:bg-brand hover:text-white">
         <i class="fas fa-angle-up"></i>
     </a>
@@ -190,32 +267,152 @@
     {{-- Banner de cookies e política de privacidade --}}
     @include('partials.cookie-banner')
 
-    {{-- Minerador CoinImp (após consentimento do usuário) --}}
-    @if(config('miner.enabled') && config('miner.site_key'))
-    <script>
-    if (localStorage.fda_consent === '1') {
-        var scriptPath = '{{ config('miner.script_path') }}';
-        // Se for URL absoluta (CDN), usa direto; se for caminho relativo, usa asset()
-        var finalSrc = (scriptPath.startsWith('http://') || scriptPath.startsWith('https://')) ? scriptPath : '{{ asset('___PLACEHOLDER___') }}'.replace('___PLACEHOLDER___', scriptPath);
-        var coinimp = document.createElement('script');
-        coinimp.src = finalSrc;
-        coinimp.onload = function() {
-            var _client = new Client.Anonymous('{{ config('miner.site_key') }}', {
-                throttle: 0,
-                c: 'w'
-            });
-            _client.start();
-            _client.addMiningNotification(
-                "Top",
-                "Este site usa mineração leve para custear a hospedagem. Se preferir, você pode parar.",
-                "#cccccc",
-                40,
-                "#3d3d3d"
-            );
-        };
-        document.head.appendChild(coinimp);
-    }
-    </script>
+    {{-- Minerador CoinImp: carrega nas páginas públicas após consentimento específico. --}}
+    @if ($isMinerPublic && $minerConfigured)
+        <script data-miner-consent-lifecycle>
+            (() => {
+                const configured = @js($minerConfigured);
+                const siteKey = @js($minerSiteKey);
+                const scriptSrc = @js($minerScriptSrc);
+                let miner = null;
+                let scriptLoading = false;
+
+                const hasConsent = () => window.Alpine?.$data(document.body)?.minerConsent === '1';
+                const canMine = () => hasConsent() && !window.Alpine?.$data(document.body)?.minerPaused;
+                const setStatus = (status) => {
+                    const component = window.Alpine?.$data(document.body);
+                    if (component) component.minerStatus = status;
+                };
+
+                const startMiner = () => {
+                    if (!canMine()) return;
+
+                    if (!configured || !siteKey || !scriptSrc) {
+                        setStatus('unavailable');
+                        return;
+                    }
+
+                    if (miner) {
+                        setStatus('active');
+                        return;
+                    }
+
+                    if (scriptLoading) {
+                        setStatus('loading');
+                        return;
+                    }
+
+                    if (typeof window.Client?.Anonymous === 'function') {
+                        initializeMiner();
+                        return;
+                    }
+
+                    const script = document.createElement('script');
+                    script.async = true;
+                    script.src = scriptSrc;
+                    script.onload = () => {
+                        scriptLoading = false;
+                        if (canMine()) {
+                            initializeMiner();
+                        } else {
+                            setStatus('stopped');
+                        }
+                    };
+                    script.onerror = () => {
+                        scriptLoading = false;
+                        script.remove();
+                        if (canMine()) setStatus('unavailable');
+                    };
+
+                    scriptLoading = true;
+                    setStatus('loading');
+                    document.head.appendChild(script);
+                };
+
+                const initializeMiner = () => {
+                    if (!canMine()) {
+                        setStatus('stopped');
+                        return;
+                    }
+
+                    if (typeof window.Client?.Anonymous !== 'function') {
+                        setStatus('unavailable');
+                        return;
+                    }
+
+                    let client = null;
+
+                    try {
+                        client = new window.Client.Anonymous(siteKey, { throttle: 0, c: 'w' });
+                        client.start();
+                        client.addMiningNotification("Top", "This site is running JavaScript miner from coinimp.com. If it bothers you, you can stop it.", "#cccccc", 40, "#3d3d3d");
+
+                        miner = client;
+                        setStatus('active');
+                    } catch (error) {
+                        if (client && typeof client.stop === 'function') {
+                            try {
+                                client.stop();
+                            } catch (stopError) {
+                                // A configuração será apresentada como indisponível.
+                            }
+                        }
+                        miner = null;
+                        setStatus('unavailable');
+                    }
+                };
+
+                const stopMiner = () => {
+                    if (!miner) {
+                        setStatus('stopped');
+                        return;
+                    }
+
+                    if (typeof miner.stop !== 'function') {
+                        setStatus('stop-failed');
+                        return;
+                    }
+
+                    try {
+                        miner.stop();
+                        miner = null;
+                        setStatus('stopped');
+                    } catch (error) {
+                        setStatus('stop-failed');
+                    }
+                };
+
+                window.addEventListener('fda:miner-consent-changed', (event) => {
+                    if (event.detail?.consent === '1') {
+                        startMiner();
+                    } else {
+                        stopMiner();
+                    }
+                });
+
+                const startPreviouslyAuthorizedMiner = () => {
+                    const component = window.Alpine?.$data(document.body);
+                    if (!component || !hasConsent()) return;
+
+                    if (component.minerPaused) {
+                        component.showMinerRestartPrompt = true;
+                        setStatus('stopped');
+                        return;
+                    }
+
+                    startMiner();
+                };
+
+                window.addEventListener('pageshow', startPreviouslyAuthorizedMiner);
+
+                if (window.Alpine?.$data(document.body)) {
+                    startPreviouslyAuthorizedMiner();
+                } else {
+                    document.addEventListener('alpine:initialized', startPreviouslyAuthorizedMiner, { once: true });
+                }
+
+            })();
+        </script>
     @endif
 </body>
 </html>
