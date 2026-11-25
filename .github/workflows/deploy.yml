@@ -2,9 +2,7 @@ name: Deploy to InfinityFree
 
 on:
   push:
-    tags: ['v*']
     branches: [main]
-  workflow_dispatch:
 
 jobs:
   deploy:
@@ -37,6 +35,7 @@ jobs:
             set ftp:chmod-default '';
             open ftp://${{ secrets.FTP_USER }}:${{ secrets.FTP_PASS }}@${{ secrets.FTP_HOST }};
             cd /htdocs;
+            put public/.htaccess.htdocs -o /htdocs/.htaccess;
             # Upload apenas arquivos do projeto (sem vendor/ nem node_modules/)
             mirror --reverse --no-perms --exclude-glob='vendor/*' --exclude-glob='node_modules/*' --exclude-glob='.git/*' --exclude-glob='storage/logs/*' --exclude-glob='storage/framework/cache/*' --exclude-glob='storage/framework/sessions/*' --exclude-glob='storage/framework/views/*' --exclude-glob='storage/framework/testing/*' --exclude-glob='public/*' --exclude-glob='wallet-mintme/*' --exclude-glob='*.zip' --exclude-glob='vendor_part_*' . /htdocs/;
             # Upload public/ (com assets compilados)
